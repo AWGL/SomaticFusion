@@ -1,8 +1,8 @@
 #!/bin/bash
 #PBS -l walltime=12:00:00
 #PBS -l ncpus=12
-PBS_O_WORKDIR=(`echo $PBS_O_WORKDIR | sed "s/^\/state\/partition1//" `)
-cd $PBS_O_WORKDIR
+#PBS_O_WORKDIR=(`echo $PBS_O_WORKDIR | sed "s/^\/state\/partition1//" `)
+#cd $PBS_O_WORKDIR
 
 # Description: Wrapper script for calling fusion genes in RNA-seq data \
 # from clinical samples using STAR-Fusion.
@@ -12,26 +12,27 @@ cd $PBS_O_WORKDIR
 # .fastq.gz files]
 
 version=0.0.1
+conda_bin_path=/home/chris/anaconda3/bin
+starfusion_lib=/home/chris/GRCh37_gencode_v19_CTAT_lib_Mar272019.plug-n-play/ctat_genome_lib_build_dir/
 
 . *.variables
 
-dir=/home/transfer/panCancerFusion/data/$sampleId/
-
 echo $sampleId
 
-## STAR-fusion required a samples_file in order to handle  multi-lane runs
-R1=$(for i in /$dir/"$sampleId"_*.fastq.gz; do echo $i | grep "R1"; done)
-R2=$(for i in /$dir/"$sampleId"_*.fastq.gz; do echo $i | grep "R2"; done)
+## STAR-fusion required a samples_file in order to handle multi-lane runs
+R1=$(for i in ./"$sampleId"_*.fastq.gz; do echo $i | grep "R1"; done)
+R2=$(for i in ./"$sampleId"_*.fastq.gz; do echo $i | grep "R2"; done)
 SAMPLE=$(for i in $R1;do echo $sampleId;done)
 paste <(printf %s "$SAMPLE") <(printf %s "$R1") <(printf %s "$R2") > "$sampleId".samples
 
-source /home/transfer/miniconda3/bin/activate star-fusion
+# activate star-fusion environment
+source "$conda_bin_path"/activate star-fusion
 
-STAR-Fusion --genome_lib_dir /home/transfer/panCancerFusion/GRCh37_gencode_v19_CTAT_lib_Mar272019.plug-n-play/ctat_genome_lib_build_dir \
+STAR-Fusion --genome_lib_dir $starfusion_lib \
             --samples_file $sampleId.samples \
-            --output_dir /home/transfer/panCancerFusion/results/$sampleId/ \
+            --output_dir ./results/ \
             --FusionInspector validate \
             --denovo_reconstruct \
             --examine_coding_effect
 
-source /home/transfer/miniconda3/bin/deactivate
+source "$conda_bin_path"/deactivate
