@@ -12,8 +12,9 @@
 # .fastq.gz files]
 
 version=0.0.1
-conda_bin_path=/home/chris/anaconda3/bin
-starfusion_lib=/home/chris/GRCh37_gencode_v19_CTAT_lib_Mar272019.plug-n-play/ctat_genome_lib_build_dir/
+conda_bin_path=/home/cm/anaconda3/bin
+starfusion_lib=/share/apps/star-fusion/GRCh37_gencode_v19_CTAT_lib_Mar272019.plug-n-play/ctat_genome_lib_build_dir/
+ncpus=12
 
 . *.variables
 
@@ -33,6 +34,8 @@ STAR-Fusion --genome_lib_dir $starfusion_lib \
             --output_dir ./results/ \
             --FusionInspector validate \
             --denovo_reconstruct \
-            --examine_coding_effect
+            --examine_coding_effect \
+            --CPU $ncpus \
+            --min_FFPM 1
 
 source "$conda_bin_path"/deactivate
