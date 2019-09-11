@@ -4,7 +4,8 @@ cd ./SampleB
 
 python make-fusion-report.py \
     --sampleId SampleB \
-    --seqId 190401_M02641_0198_000000000-CCCFJ
+    --seqId 190401_M02641_0198_000000000-CCCFJ \
+    --ip $(hostname --ip-address)
 
 rm make-fusion-report.py
 

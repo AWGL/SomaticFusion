@@ -12,14 +12,43 @@ def get_args():
 
     parser.add_argument('--sampleId', help='unique identification of sample', required=True)
     parser.add_argument('--seqId', help='run directory ID', required=True)
+    parser.add_argument('--ip', help='required for igv batchfile', required=True)
 
     args=parser.parse_args()
     return(args)
 
+def make_igv_batchfile(args):
+
+    outputfile = "./fusionReport/" + args.sampleId + "_igv_report.batch"
+
+    path_for_igv = "//" + args.ip + os.getcwd() + "/Star-Fusion/FusionInspector-validate/"
+    print(path_for_igv)
+
+    try:
+        os.remove(outputfile)
+    except OSError:
+        pass
+
+    out = open(outputfile, 'a')
+    out.write(
+        "new" + "\n" +
+        "genome " + path_for_igv + "finspector.fa" + "\n" +
+        "load " + path_for_igv + "cytoBand.txt" + "\n" +
+        "load " + path_for_igv + "finspector.gtf" + "\n" +
+        "load " + path_for_igv + "finspector.junction_reads.bam" + "\n" +
+        "load " + path_for_igv + "finspector.spanning_reads.bam"
+    )
+
+    out.close()
+
+
+
+
+
 def fusion_report(args):
 
-    outputfile = args.sampleId + "_fusionReport.txt"
-    star_fusion_results_path = "./results/FusionInspector-validate/finspector.FusionInspector.fusions.abridged.tsv.annotated.coding_effect"
+    outputfile = "./fusionReport/" + args.sampleId + "_fusionReport.txt"
+    star_fusion_results_path = "./STAR-Fusion/FusionInspector-validate/finspector.FusionInspector.fusions.abridged.tsv.annotated.coding_effect"
 
     try:
         os.remove(outputfile)
@@ -83,5 +112,9 @@ def fusion_report(args):
         out.close()
 
 if __name__ == '__main__':
+
+    os.mkdir("./fusionReport")
+
     args = get_args()
     fusion_report(args)
+    make_igv_batchfile(args)
