@@ -31,7 +31,7 @@ source "$conda_bin_path"/activate star-fusion
 
 STAR-Fusion --genome_lib_dir $starfusion_lib \
             --samples_file $sampleId.samples \
-            --output_dir ./results/ \
+            --output_dir ./STAR-Fusion/ \
             --FusionInspector validate \
             --denovo_reconstruct \
             --examine_coding_effect \

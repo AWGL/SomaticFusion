@@ -12,6 +12,7 @@ def get_args():
 
     parser.add_argument('--sampleId', help='unique identification of sample', required=True)
     parser.add_argument('--seqId', help='run directory ID', required=True)
+    parser.add_argument('--panel', help='name of panel', required=True)
     parser.add_argument('--ip', help='required for igv batchfile', required=True)
 
     args=parser.parse_args()
@@ -21,7 +22,16 @@ def make_igv_batchfile(args):
 
     outputfile = "./fusionReport/" + args.sampleId + "_igv_report.batch"
 
-    path_for_igv = "//" + args.ip + os.getcwd() + "/Star-Fusion/FusionInspector-validate/"
+    path_for_igv = "//" + \
+	args.ip + \
+	"/results/" + \
+	args.seqId + \
+	"/" + \
+	args.panel + \
+	"/" + \
+	args.sampleId + \
+	"/STAR-Fusion/FusionInspector-validate/"
+
     print(path_for_igv)
 
     try:
