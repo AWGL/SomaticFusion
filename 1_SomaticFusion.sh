@@ -1,10 +1,10 @@
 #!/bin/bash
 # set -euo pipefail
-
 #PBS -l walltime=12:00:00
 #PBS -l ncpus=12
-#PBS_O_WORKDIR=(`echo $PBS_O_WORKDIR | sed "s/^\/state\/partition1//" `)
-#cd $PBS_O_WORKDIR
+
+PBS_O_WORKDIR=(`echo $PBS_O_WORKDIR | sed "s/^\/state\/partition1//" `)
+cd $PBS_O_WORKDIR
 
 # Description: Wrapper script for calling fusion genes in RNA-seq data \
 # from clinical samples using STAR-Fusion.
@@ -51,16 +51,17 @@ for fastqPair in $(ls "$sampleId"_S*.fastq.gz | cut -d_ -f1-3 | sort | uniq); do
     -a "$read1Adapter" \
     -A "$read2Adapter" \
     -m 35 \
+    --cores $ncpus \
     -o "$seqId"_"$sampleId"_"$laneId"_R1.fastq \
     -p "$seqId"_"$sampleId"_"$laneId"_R2.fastq \
     "$read1Fastq" \
     "$read2Fastq"
 
     #fastqc
-    fastqc -d /state/partition1/tmpdir --threads 12 --extract "$seqId"_"$sampleId"_"$laneId"_R1.fastq
-    fastqc -d /state/partition1/tmpdir --threads 12 --extract "$seqId"_"$sampleId"_"$laneId"_R2.fastq
-    mv "$seqId"_"$sampleId"_"$laneId"_R1_fastqc/summary.txt "$seqId"_"$sampleId"_"$laneId"_R1_fastqc.txt
-    mv "$seqId"_"$sampleId"_"$laneId"_R2_fastqc/summary.txt "$seqId"_"$sampleId"_"$laneId"_R2_fastqc.txt
+    mkdir -p FASTQC
+
+    fastqc -d /state/partition1/tmpdir --threads 12 --extract "$seqId"_"$sampleId"_"$laneId"_R1.fastq -o FASTQC
+    fastqc -d /state/partition1/tmpdir --threads 12 --extract "$seqId"_"$sampleId"_"$laneId"_R2.fastq -o FASTQC
 
     #check FASTQC output
     if [ $(countQCFlagFails "$seqId"_"$sampleId"_"$laneId"_R1_fastqc.txt) -gt 0 ] || [ $(countQCFlagFails "$seqId"_"$sampleId"_"$laneId"_R2_fastqc.txt) -gt 0 ]; then
@@ -92,6 +93,12 @@ STAR-Fusion --genome_lib_dir $starfusion_lib \
 ###########################
 # Generate Fusion Reports #
 ###########################
+
+python make-fusion-report.py \
+    --sampleId $sampleId \
+    --seqId $seqId \
+    --panel $panel \
+    --ip $(hostname --ip-address)
 
 # deactivate conda env
 source "$conda_bin_path"/deactivate
