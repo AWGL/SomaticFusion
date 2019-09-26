@@ -15,8 +15,16 @@ cd $PBS_O_WORKDIR
 
 version=0.0.1
 
+# source variables file
 . *.variables
-. /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/$panel/$panel.variables
+
+# copy the panel & pipeline variables locally and source
+cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/$panel/$panel.variables . 
+cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/SomaticFusion.config .
+cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/make-fusion-report.py .
+
+. $panel.variables
+. SomaticFusion.config
 
 # set conda env
 source "$conda_bin_path"/activate SomaticFusion
