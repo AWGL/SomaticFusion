@@ -64,7 +64,7 @@ for fastqPair in $(ls "$sampleId"_S*.fastq.gz | cut -d_ -f1-4 | sort | uniq); do
     read2Fastq=$(ls "$fastqPair"_R2_*fastq.gz)
 
     #trim adapters
-    cutadapt -a AGATCGGAAGAGC -A AGATCGGAAGAGC -m 35 -o "$seqId"_"$sampleId"_"$laneId"_R1.fastq -p "$seqId"_"$sampleId"_"$laneId"_R2.fastq "$read1Fastq" "$read2Fastq"
+    cutadapt -a $read1Adapter -A $read2Adapter -m 35 -o "$seqId"_"$sampleId"_"$laneId"_R1.fastq -p "$seqId"_"$sampleId"_"$laneId"_R2.fastq "$read1Fastq" "$read2Fastq"
 
 
     #fastqc -d /state/partition1/tmpdir --threads 12 --extract "$seqId"_"$sampleId"_"$laneId"_R1.fastq
