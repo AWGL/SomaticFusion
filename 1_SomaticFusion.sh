@@ -1,9 +1,8 @@
 
 #!/bin/bash
 # set -euo pipefail
-#PBS -l walltime=12:00:00
+#PBS -l walltime=40:00:00
 #PBS -l ncpus=12
-
 PBS_O_WORKDIR=(`echo $PBS_O_WORKDIR | sed "s/^\/state\/partition1//" `)
 cd $PBS_O_WORKDIR
 
@@ -24,12 +23,14 @@ cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/$panel/$pane
 cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/SomaticFusion.config .
 cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/make-fusion-report.py .
 cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/RNA_fusion_group_file.txt .
+cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/RNAFusion-ROI_adapted.bed .
 
+gatk3=/share/apps/GATK-distros/GATK_3.8.0/GenomeAnalysisTK.jar
+minMQS=20
+minBQS=10
 
 vendorCaptureBed=./180702_HG19_PanCancer_EZ_capture_targets.bed
 vendorPrimaryBed=./180702_HG19_PanCancer_EZ_primary_targets.bed
-
-gatk3=/share/apps/GATK-distros/GATK_3.8.0/GenomeAnalysisTK.jar
 
 . $panel.variables
 . SomaticFusion.config
@@ -45,7 +46,7 @@ source "$conda_bin_path"/activate SomaticFusion
 #count how many core FASTQC tests failed
 countQCFlagFails() {
     grep -E "Basic Statistics|Per base sequence quality|Per tile sequence quality|Per sequence quality scores|Per base N content" "$1" | \
-   grep -v ^PASS | \
+    grep -v ^PASS | \
     grep -v ^WARN | \
     wc -l | \
     sed 's/^[[:space:]]*//g'
@@ -67,7 +68,7 @@ for fastqPair in $(ls "$sampleId"_S*.fastq.gz | cut -d_ -f1-4 | sort | uniq); do
     cutadapt -a $read1Adapter -A $read2Adapter -m 35 -o "$seqId"_"$sampleId"_"$laneId"_R1.fastq -p "$seqId"_"$sampleId"_"$laneId"_R2.fastq "$read1Fastq" "$read2Fastq"
 
 
-    #fastqc -d /state/partition1/tmpdir --threads 12 --extract "$seqId"_"$sampleId"_"$laneId"_R1.fastq
+    fastqc -d /state/partition1/tmpdir --threads 12 --extract "$seqId"_"$sampleId"_"$laneId"_R1.fastq
     fastqc -d /state/partition1/tmpdir --threads 12 --extract "$seqId"_"$sampleId"_"$laneId"_R2.fastq
 
     mv "$seqId"_"$sampleId"_"$laneId"_R1_fastqc/summary.txt "$seqId"_"$sampleId"_"$laneId"_R1_fastqc.txt
@@ -76,7 +77,7 @@ for fastqPair in $(ls "$sampleId"_S*.fastq.gz | cut -d_ -f1-4 | sort | uniq); do
     #check FASTQC output
     if [ $(countQCFlagFails "$seqId"_"$sampleId"_"$laneId"_R1_fastqc.txt) -gt 0 ] || [ $(countQCFlagFails "$seqId"_"$sampleId"_"$laneId"_R2_fastqc.txt) -gt 0 ]; then
         rawSequenceQuality=FAIL
-fi
+    fi
 
 
 
@@ -94,14 +95,15 @@ STAR --chimSegmentMin 12 \
      --chimSegmentReadGapMax 3 \
      --alignSJDBoverhangMin 10 \
      --alignMatesGapMax 200000 \
-     --chimOutType SeparateSAMold \
+     --chimOutType WithinBAM \
      --alignIntronMax 200000  \
      --alignSJstitchMismatchNmax 5 -1 5 5  \
      --twopassMode Basic \
+     --outSAMtype BAM Unsorted \
      --readFilesIn "$seqId"_"$sampleId"_"$laneId"_R1.fastq "$seqId"_"$sampleId"_"$laneId"_R2.fastq \
      --genomeDir /share/apps/star-fusion/GRCh37_gencode_v19_CTAT_lib_Mar272019.plug-n-play/ctat_genome_lib_build_dir/ref_genome.fa.star.idx  \
      --outFileNamePrefix "$seqId"_"$sampleId"_"$laneId"_ \
-     --outSAMattrRGline ID:$sampleId SM:$sampleId_without_conc
+     --outSAMattrRGline ID:"$sampleId" SM:"$sampleId_without_conc"
 done
 
 
@@ -138,22 +140,14 @@ python make-fusion-report.py \
     --panel $panel \
     --ip $(hostname --ip-address)
 
-# deactivate conda env
+#deactivate conda env
 source "$conda_bin_path"/deactivate
 
 
 
-#################################################
-# Covert sam files to bam files and merge lanes #
-#################################################
-
-
-for sam_file in *.Aligned.out.sam; do
-
-    laneId=$(ls "$sam_file" | cut -d  "_" -f7)
-    samtools view -S -b "$sam_file" > "$seqId"_"$sampleId"_"$laneId"_Aligned.out.bam
-
-done
+############################
+# merge and sort bam files #
+############################
 
 
 samtools merge "$sampleId"_Aligned_out.bam *Aligned.out.bam 
@@ -164,43 +158,34 @@ samtools index "$sampleId"_Aligned_sorted.bam
 
 
 
-for sam_file in *Chimeric.out.sam; do
-
-    laneId=$(ls "$sam_file" | cut -d  "_" -f7)
-
-    samtools view -S -b "$sam_file" > "$seqId"_"$sampleId"_"$laneId"_Chimeric.out.bam
-
-done
-
-samtools merge "$sampleId"_Chimeric.out.bam *Chimeric.out.bam
-
-
-
 ##############
 # Run arriba #
 ##############
 
+source "$conda_bin_path"/activate SomaticFusion
+
 arriba -x "$sampleId"_Aligned_sorted.bam \
 -g /share/apps/star-fusion/GRCh37_gencode_v19_CTAT_lib_Mar272019.plug-n-play/ctat_genome_lib_build_dir/ref_annot.gtf \
 -a /share/apps/star-fusion/GRCh37_gencode_v19_CTAT_lib_Mar272019.plug-n-play/ctat_genome_lib_build_dir/ref_genome.fa \
--o "$sampleId"_fusions_adapted.tsv -b /home/transfer/miniconda3/envs/arriba/var/lib/arriba/blacklist_hg19_hs37d5_GRCh37_2018_11-04.tsv.gz \
--c "$sampleId"_Chimeric.out.bam \
+-o "$sampleId"_fusions_adapted.tsv \
+-b /home/transfer/miniconda3/envs/arriba/var/lib/arriba/blacklist_hg19_hs37d5_GRCh37_2018-11-04.tsv.gz \
 -O "$sampleId"_fusions_discarded_adapted.tsv \
 -R 0 \
--f intragenic,same_gene
+-f intragenic_exonic,same_gene
 
+source "$conda_bin_path"/deactivate
 
 
 ###############################
 # Calculate depth of coverage #
 ###############################
 
-## DOC
+
 /share/apps/jre-distros/jre1.8.0_131/bin/java -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -Djava.io.tmpdir=/state/partition1/tmpdir -Xmx4g -jar $gatk3 \
    -T DepthOfCoverage \
    -R /share/apps/star-fusion/star-fusion-ref.fa \
    -I  "$sampleId"_Aligned_sorted.bam \
-   -L ../RNAFusion-ROI_adapted.bed \
+   -L RNAFusion-ROI_adapted.bed \
    -o "$seqId"_"$sampleId"_DepthOfCoverage \
    --countType COUNT_FRAGMENTS \
    --minMappingQuality $minMQS \
@@ -234,9 +219,9 @@ python /home/transfer/pipelines/CoverageCalculatorPy/CoverageCalculatorPy.py \
 
 
 
-#################################################
+########################
 # Calculate qc metrics #
-#################################################
+########################
 
 
 if [ ! -f ../"$seqId"_"$sampleId"_HsMetrics.txt ]; then
@@ -253,5 +238,7 @@ if [ ! -f ../"$seqId"_"$sampleId"_HsMetrics.txt ]; then
      MINIMUM_MAPPING_QUALITY=$minMQS \
      MINIMUM_BASE_QUALITY=$minBQS \
      CLIP_OVERLAPPING_READS=false
+
+fi
 
 
