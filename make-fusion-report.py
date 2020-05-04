@@ -9,7 +9,7 @@ generates a single text report and and IGV batch file for each sample
 
 Aurthor: Christopher Medway
 Created: 12th September 2019
-Version: 0.0.1
+Version: 0.0.2
 """
 
 import os
@@ -88,8 +88,8 @@ def fusion_report(args):
     out = open(outputfile, 'a')
     out.write(
         "Fusion_Name" + "\t" +
-        "Junction_Read_Count" + "\t" +
         "Split_Read_Count" + "\t" +
+        "Spanning_Read_Count" + "\t" +
         "Left_Breakpoint" + "\t" +
         "Right_Breakpoint" + "\t" +
         "CDS_Left_ID" + "\t" +
