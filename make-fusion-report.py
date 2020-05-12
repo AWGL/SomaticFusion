@@ -92,6 +92,10 @@ def fusion_report(args):
         "Spanning_Read_Count" + "\t" +
         "Left_Breakpoint" + "\t" +
         "Right_Breakpoint" + "\t" +
+        "SpliceType" + "\t" +
+        "LargeAnchorSupport" + "\t" +
+        "LeftBreakEntropy" + "\t" +
+        "RightBreakEntropy" + "\t" +
         "CDS_Left_ID" + "\t" +
         "CDS_Left_Range" + "\t" +
         "CDS_Right_ID" + "\t" +
@@ -100,6 +104,8 @@ def fusion_report(args):
         "Num_WT_Fragments_Left" + "\t" +
         "Num_WT_Fragments_Right" + "\t" +
         "Fusion_Allelic_Fraction" + "\n")
+
+
 
     with open(star_fusion_results_path) as sf:
         header_line = sf.readline()
@@ -129,6 +135,10 @@ def fusion_report(args):
                     sfln[2] + "\t" +
                     sfln[5] + "\t" +
                     sfln[8] + "\t" +
+                    sfln[9] + "\t" +
+                    sfln[10] + "\t" +
+                    sfln[17] + "\t" +
+                    sfln[19] + "\t" +
                     sfln[21] + "\t" +
                     sfln[22] + "\t" +
                     sfln[23] + "\t" +

@@ -24,6 +24,7 @@ cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/SomaticFusio
 cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/make-fusion-report.py .
 cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/RNA_fusion_group_file.txt .
 cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/RNAFusion-ROI_adapted.bed .
+cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/fusion_report_referrals.py .
 
 gatk3=/share/apps/GATK-distros/GATK_3.8.0/GenomeAnalysisTK.jar
 minMQS=20
@@ -207,7 +208,7 @@ sed 's/:/\t/g'  "$seqId"_"$sampleId"_DepthOfCoverage | grep -v 'Locus' | sort -k
 tabix -b 2 -e 2 -s 1 "$seqId"_"$sampleId"_DepthOfCoverage.gz
 
 
-source /home/transfer/miniconda3/bin/activate CoverageCalculatorPy
+source "$conda_bin_path"/activate CoverageCalculatorPy
 
 
 python /home/transfer/pipelines/CoverageCalculatorPy/CoverageCalculatorPy.py \
@@ -241,4 +242,33 @@ if [ ! -f ../"$seqId"_"$sampleId"_HsMetrics.txt ]; then
 
 fi
 
+
+
+#Alignment metrics: library sequence similarity
+/share/apps/jre-distros/jre1.8.0_131/bin/java -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -Djava.io.tmpdir=/state/partition1/tmpdir -Xmx2g \
+    -jar /share/apps/picard-tools-distros/picard-tools-2.18.5/picard.jar CollectAlignmentSummaryMetrics \
+    R=/share/apps/star-fusion/GRCh37_gencode_v19_CTAT_lib_Mar272019.plug-n-play/ctat_genome_lib_build_dir/ref_genome.fa \
+    ADAPTER_SEQUENCE=AGATCGGAAGAGC \
+    I="$sampleId"_Aligned_sorted.bam \
+    O=../"$sampleId"_AlignmentSummaryMetrics.txt \
+    MAX_RECORDS_IN_RAM=2000000 \
+TMP_DIR=/state/partition1/tmpdir
+
+
+source "$conda_bin_path"/deactivate
+
+#######################################
+#Separate reports into referral types #
+#######################################
+
+mkdir ./Results
+mkdir ./Results/arriba
+mkdir ./Results/arriba_discarded
+mkdir ./Results/STAR_Fusion
+
+source "$conda_bin_path"/activate SomaticFusion
+
+python fusion_report_referrals.py /data/results/"$seqId"/RocheSTFusion/"$sampleId"/ $sampleId
+
+source "$conda_bin_path"/deactivate
 
