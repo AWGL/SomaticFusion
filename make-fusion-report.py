@@ -39,7 +39,7 @@ def make_igv_batchfile(args):
     :param args:
     :return:
     """
-    outputfile = "./fusionReport/" + args.sampleId + "_igv_report.batch"
+    outputfile = "./fusionReport_test/" + args.sampleId + "_igv_report.batch"
 
     path_for_igv = '//' + \
                    args.ip + \
@@ -77,7 +77,7 @@ def fusion_report(args):
     :param args:
     :return:
     """
-    outputfile = "./fusionReport/" + args.sampleId + "_fusionReport.txt"
+    outputfile = "./fusionReport_test/" + args.sampleId + "_fusionReport_test.txt"
     star_fusion_results_path = "./STAR-Fusion/FusionInspector-validate/finspector.FusionInspector.fusions.abridged.tsv.annotated.coding_effect"
 
     try:
@@ -94,6 +94,7 @@ def fusion_report(args):
         "Right_Breakpoint" + "\t" +
         "SpliceType" + "\t" +
         "LargeAnchorSupport" + "\t" +
+        "FFPM" + "\t" +
         "LeftBreakEntropy" + "\t" +
         "RightBreakEntropy" + "\t" +
         "CDS_Left_ID" + "\t" +
@@ -120,7 +121,7 @@ def fusion_report(args):
                     junc_read_ct + span_frag_ct) > 2:
                 fusion = sfln[0]
                 left_breakpoint = sfln[5]
-                right_breakpoint = sfln[7]
+                right_breakpoint = sfln[8]
                 num_counter_fusion_left = int(sfln[11])
                 num_counter_fusion_right = int(sfln[12])
 
@@ -128,6 +129,20 @@ def fusion_report(args):
                 fafL = (junc_read_ct + span_frag_ct) / (num_counter_fusion_left + junc_read_ct + span_frag_ct)
                 fafR = (junc_read_ct + span_frag_ct) / (num_counter_fusion_right + junc_read_ct + span_frag_ct)
                 faf = ((fafL + fafR) / 2)
+
+
+                right_breakpoint = sfln[8]
+
+                FFPM="none"
+
+                with open("./STAR-Fusion/star-fusion.fusion_predictions.abridged.tsv") as fusion_FFPM:
+                    headerline=fusion_FFPM.readline()
+                    for line in fusion_FFPM:
+                        fusion_FFPM_line=line.split('\t')
+                        if ((fusion_FFPM_line[5] == left_breakpoint) and (fusion_FFPM_line[7] == right_breakpoint)) :
+                            FFPM=fusion_FFPM_line[9]
+
+
 
                 out.write(
                     sfln[0] + "\t" +
@@ -137,6 +152,7 @@ def fusion_report(args):
                     sfln[8] + "\t" +
                     sfln[9] + "\t" +
                     sfln[10] + "\t" +
+                    FFPM + "\t" +
                     sfln[17] + "\t" +
                     sfln[19] + "\t" +
                     sfln[21] + "\t" +
@@ -153,7 +169,7 @@ def fusion_report(args):
 
 
 if __name__ == '__main__':
-    os.mkdir("./fusionReport")
+    os.mkdir("./fusionReport_test")
 
     args = get_args()
     fusion_report(args)
