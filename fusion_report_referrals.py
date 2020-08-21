@@ -50,7 +50,7 @@ for referral in referrals:
     else:
         outfile_star_fusion="./Results/STAR_Fusion/"+sampleId+"_fusion_report_"+referral+".txt"
         out_star_fusion=open(outfile_star_fusion,"w+" )
-        out_star_fusion.write("No fusions called")
+        out_star_fusion.write(referral+"-No fusions called")
 
 
     if (fusion_report_arriba.shape[0]!=0):
@@ -59,7 +59,7 @@ for referral in referrals:
     else:
         outfile_arriba="./Results/arriba/"+sampleId+"_fusion_report_"+referral+"_arriba.txt"
         out_arriba=open(outfile_arriba, "w+")
-        out_arriba.write("No fusions called")
+        out_arriba.write(referral+"-No fusions called")
 
 
     if (fusion_report_arriba_discarded.shape[0]!=0):
@@ -68,5 +68,5 @@ for referral in referrals:
     else:
         outfile_arriba_discarded="./Results/arriba_discarded/"+sampleId+"_fusion_report_"+referral+"_arriba_discarded.txt"
         out_arriba_discarded=open(outfile_arriba_discarded,"w+")
-        out_arriba_discarded.write("No fusions discarded")
+        out_arriba_discarded.write(referral+"-No fusions discarded")
 

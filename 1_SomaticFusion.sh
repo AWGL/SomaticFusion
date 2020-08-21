@@ -13,7 +13,7 @@ cd $PBS_O_WORKDIR
 # Usage: qsub run_star-fusion.sh [inside sample dir with .variables and \
 # .fastq.gz files]
 
-version=0.0.3
+version=0.0.4
 
 # source variables file
 . *.variables
@@ -23,9 +23,10 @@ cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/$panel/$pane
 cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/SomaticFusion.config .
 cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/make-fusion-report.py .
 cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/RNA_fusion_group_file.txt .
-cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/RNAFusion-ROI_adapted.bed .
+cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/RNAFusion-ROI.bed .
 cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/fusion_report_referrals.py .
 cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/make_worksheets.py .
+cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/rmats/RMATS.config .
 
 gatk3=/share/apps/GATK-distros/GATK_3.8.0/GenomeAnalysisTK.jar
 minMQS=20
@@ -120,16 +121,21 @@ R2=$(for i in ./"$sampleId"_*.fastq.gz; do echo $i | grep "R2"; done)
 SAMPLE=$(for i in $R1;do echo $sampleId;done)
 paste <(printf %s "$SAMPLE") <(printf %s "$R1") <(printf %s "$R2") > "$sampleId".samples
 
-# run STAR-Fusion
 STAR-Fusion --genome_lib_dir $starfusion_lib \
             --samples_file $sampleId.samples \
             --output_dir ./STAR-Fusion/ \
-            --FusionInspector validate \
             --denovo_reconstruct \
             --examine_coding_effect \
+            --FusionInspector inspect \
             --CPU $ncpus \
-            --min_FFPM 1
+            --min_FFPM 1 \
+            --require_LDAS 0
 
+cd STAR-Fusion
+
+/home/transfer/miniconda3/envs/SomaticFusion/lib/STAR-Fusion/FusionInspector/FusionInspector --fusions star-fusion.fusion_predictions.abridged.coding_effect.tsv  --out_prefix finspector  --min_junction_reads 1  --min_novel_junction_support 3  --min_spanning_frags_only 5  --vis  --max_promiscuity 10  --out_dir /share/data/results/"$seqId"/RocheSTFusion/"$sampleId"/STAR-Fusion/FusionInspector-validate  --genome_lib_dir /share/apps/star-fusion/GRCh37_gencode_v19_CTAT_lib_Mar272019.plug-n-play/ctat_genome_lib_build_dir/  --CPU 12  --samples_file /share/data/results/"$seqId"/RocheSTFusion/"$sampleId"/STAR-Fusion/starF.target_samples.txt  --include_Trinity  --annotate  --examine_coding_effect --require_LDAS 0
+
+cd ..
 
 ###########################
 # Generate Fusion Reports #
@@ -187,7 +193,7 @@ source "$conda_bin_path"/deactivate
    -T DepthOfCoverage \
    -R /share/apps/star-fusion/star-fusion-ref.fa \
    -I  "$sampleId"_Aligned_sorted.bam \
-   -L RNAFusion-ROI_adapted.bed \
+   -L RNAFusion-ROI.bed \
    -o "$seqId"_"$sampleId"_DepthOfCoverage \
    --countType COUNT_FRAGMENTS \
    --minMappingQuality $minMQS \
@@ -213,7 +219,7 @@ source "$conda_bin_path"/activate CoverageCalculatorPy
 
 
 python /home/transfer/pipelines/CoverageCalculatorPy/CoverageCalculatorPy.py \
--B RNAFusion-ROI_adapted.bed \
+-B RNAFusion-ROI.bed \
 -D /data/results/"$seqId"/RocheSTFusion/"$sampleId"/"$seqId"_"$sampleId"_DepthOfCoverage.gz \
 --padding 0 \
 --groupfile RNA_fusion_group_file.txt \
@@ -304,7 +310,7 @@ TMP_DIR=/state/partition1/tmpdir
    -T DepthOfCoverage \
    -R /share/apps/star-fusion/star-fusion-ref.fa \
    -I  "$sampleId"_rmdup.bam \
-   -L RNAFusion-ROI_adapted.bed \
+   -L RNAFusion-ROI.bed \
    -o "$sampleId"_rmdup_DepthOfCoverage \
    --countType COUNT_FRAGMENTS \
    --minMappingQuality 20  \
@@ -329,13 +335,110 @@ tabix -b 2 -e 2 -s 1 "$sampleId"_rmdup_DepthOfCoverage.gz
 
 
 python /home/transfer/pipelines/CoverageCalculatorPy/CoverageCalculatorPy.py \
--B RNAFusion-ROI_adapted.bed \
+-B RNAFusion-ROI.bed \
 -D /data/results/"$seqId"/RocheSTFusion/"$sampleId"/"$sampleId"_rmdup_DepthOfCoverage.gz \
 --padding 0 \
 --groupfile RNA_fusion_group_file.txt \
 --outname "$sampleId"_rmdup_coverage
 
 source "$conda_bin_path"/deactivate
+
+
+
+###########
+#Run RMATS#
+###########
+
+source ~/miniconda3/bin/activate rmats
+
+# source variables
+. RMATS.config
+OUTPUT_DIR=/data/results/$seqId/$panel/$sampleId/
+
+# rmats output here
+if [ -d "$OUTPUT_DIR"/RMATS ]; then
+  rm -r "$OUTPUT_DIR"/RMATS
+fi
+
+mkdir -p "$OUTPUT_DIR"/RMATS
+
+# create text file with query sample bam location - required by RMATS
+echo /data/results/"$seqId"/"$panel"/"$sampleId"/"$sampleId"_Aligned_sorted.bam > "$OUTPUT_DIR"/RMATS/query_sample.txt
+
+# rmats calling
+rmats.py \
+      --b1 "$OUTPUT_DIR"/RMATS/query_sample.txt \
+      --b2 $RMATS_REF_SAMPLES \
+      -t paired \
+      --gtf $GTF_PATH \
+      --variable-read-length \
+      --od "$OUTPUT_DIR"/RMATS \
+      --tmp "$OUTPUT_DIR"/RMATS \
+      --readLength $READ_LENGTH \
+      --nthread $THREADS \
+      --tstat $THREADS
+
+
+#########################
+# GENERATE RMATS REPORT #
+#########################
+
+# ENSEMBL GENE ID
+# GENE SYMBOL
+# CHROMOSOME
+# START OF EVENT
+# END OF EVENT
+# IJC_SAMPLE = NUMBER OF JUNCTION READS SUPPORTING EXON (I)NCLUSION IN SAMPLE
+# SJC_SAMPLE = NUMBER OF JUNCTION READS SUPPORTING EXON (S)KIPPING  IN SAMPLE
+# IJC_REF = NUMBER OF JUNCTION READS SUPPORTING EXON (I)NCLUSION IN POOLED REF
+# SJC_REF = NUMBER OF JUNCTION READS SUPPORTING EXON (S)KIPPING  IN POOLED REF
+# FDR = P-Value (FALSE DISCOVERY RATE)
+# INC_LEVEL_SAMPLE = PROPORTION OF READS SUPPORTING EXON INCLUSION IN SAMPLE (X)
+# INC_LEV_REF = PROPORTION OF READS SUPPORTING EXON INCLUSION IN REF (Y)
+# INC_LEV_DIFF = mean(X) - mean(Y)"
+
+
+# remove legacy report file
+if [ -f "$OUTPUT_DIR"/"$seqId"_"$sampleId"_RMATS_Report.tsv ]; then
+  rm  "$OUTPUT_DIR"/"$seqId"_"$sampleId"_RMATS_Report.tsv
+fi
+
+
+if [ -f "$OUTPUT_DIR"/RMATS/SE.MATS.JC.txt ]; then
+
+  # if no fusion are called assume error with RMATS
+  n_fusions=$(wc -l "$OUTPUT_DIR"/RMATS/SE.MATS.JC.txt)
+  if [[ $n_fusions < 3 ]]; then
+    exit 1
+  fi
+
+  # read RMATS exon skipping report, extract MET and EGFR events
+  while read ln; do
+
+    if [[ $ln == ID* ]]; then
+
+      header=$(echo $ln | cut -f 2-4,6-7,13-16,20-23)
+      echo $header "Sample1_Perc_SJC" | sed -e 's/ /\t/g' > "$OUTPUT_DIR"/"$seqId"_"$sampleId"_RMATS_Report.tsv 
+
+    elif [[ $ln =~ "chr7	+	116411902	116412043" ]] || [[ $ln =~ "chr7	+	55209978	55221845" ]]; then
+
+      main=$(echo $ln | cut -f 2-4,6-7,13-16,20-23)
+
+      IJC=$(echo $ln | cut -d " " -f 13)
+      SJC=$(echo $ln | cut -d " " -f 14)
+      
+      # calculate proportion metric (as requested by HR)
+      PROP=$(awk "BEGIN {print "$SJC"/("$IJC"+"$SJC")*100}")
+
+      echo -e $main $PROP | sed -e 's/ /\t/g' >> "$OUTPUT_DIR"/"$seqId"_"$sampleId"_RMATS_Report.tsv
+    fi
+
+  done < "$OUTPUT_DIR"/RMATS/SE.MATS.JC.txt
+
+fi
+
+source ~/miniconda3/bin/deactivate
+
 
 
 
@@ -356,28 +459,46 @@ source "$conda_bin_path"/deactivate
 
 
 
-########################
-#create analysis sheets#
-########################
+################################
+#Append sampleId to sample list#
+################################
+
+if [ -e /data/results/"$seqId"/"$panel"/*/Results/arriba_discarded/"$sampleId"_fusion_report_NTRK3_arriba_discarded.txt ]
+then
+    echo $sampleId >> /data/results/"$seqId"/RocheSTFusion/samples_list.txt
+fi
 
 
-expected =$(for i in /data/results/$seqId/$panel/*/*.variables; do echo $i; done | wc -l)
-
-complete=$(for i in /data/results/$seqId/$panel/*/Results/arriba_discarded/"+sampleId+"_fusion_report_"+referral+"_arriba_discarded.txt ; do echo $i; done | wc -l)
-
-if [$complete -eq $expected]; then
-
-    source "$conda_bin_path"/activate VirtualHood
-
-    ntc=$(for s in /data/results/$seqId/RocheSTFusion/*/; do echo $(basename $s);done | grep 'NTC')
+#################################################################
+#create total_reads_list, contamination_list and analysis sheets#
+#################################################################
 
 
-    if ($sampleId != $ntc):
+expected=$(for i in /data/results/"$seqId"/"$panel"/*/*.variables; do echo $i; done | wc -l)
 
-        python make_worksheets.py $seqId $sampleId $referral $ntc
-    fi
+complete=$(cat ../samples_list.txt| uniq | wc -l)
 
-    source "$conda_bin_path"/deactivate
+if [ "$complete" -eq "$expected" ]; then
+
+    #combine the total reads and total aligned reads information for all samples on the run
+    python total_reads_list.py $seqId
+
+    #calculate contamination for run
+    #python contamination_check.py
+
+
+    #create analysis spreadsheets
+
+    #source "$conda_bin_path"/activate VirtualHood
+
+    #ntc=$(for s in /data/results/$seqId/RocheSTFusion/*/; do echo $(basename $s);done | grep 'NTC')
+
+    #if ($sampleId != $ntc):
+
+    #    python make_worksheets.py $sampleId $referral $ntc
+    #fi
+
+    #source "$conda_bin_path"/deactivate
 
 fi
 
