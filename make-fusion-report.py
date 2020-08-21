@@ -9,7 +9,7 @@ generates a single text report and and IGV batch file for each sample
 
 Aurthor: Christopher Medway
 Created: 12th September 2019
-Version: 0.0.2
+Version: 0.0.3
 """
 
 import os
@@ -39,7 +39,7 @@ def make_igv_batchfile(args):
     :param args:
     :return:
     """
-    outputfile = "./fusionReport_test/" + args.sampleId + "_igv_report.batch"
+    outputfile = "./fusionReport/" + args.sampleId + "_igv_report.batch"
 
     path_for_igv = '//' + \
                    args.ip + \
@@ -77,7 +77,7 @@ def fusion_report(args):
     :param args:
     :return:
     """
-    outputfile = "./fusionReport_test/" + args.sampleId + "_fusionReport_test.txt"
+    outputfile = "./fusionReport/" + args.sampleId + "_fusionReport.txt"
     star_fusion_results_path = "./STAR-Fusion/FusionInspector-validate/finspector.FusionInspector.fusions.abridged.tsv.annotated.coding_effect"
 
     try:
@@ -169,7 +169,7 @@ def fusion_report(args):
 
 
 if __name__ == '__main__':
-    os.mkdir("./fusionReport_test")
+    os.mkdir("./fusionReport")
 
     args = get_args()
     fusion_report(args)

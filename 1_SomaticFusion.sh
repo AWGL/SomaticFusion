@@ -13,7 +13,7 @@ cd $PBS_O_WORKDIR
 # Usage: qsub run_star-fusion.sh [inside sample dir with .variables and \
 # .fastq.gz files]
 
-version=0.0.2
+version=0.0.3
 
 # source variables file
 . *.variables
@@ -25,6 +25,7 @@ cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/make-fusion-
 cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/RNA_fusion_group_file.txt .
 cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/RNAFusion-ROI_adapted.bed .
 cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/fusion_report_referrals.py .
+cp /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/make_worksheets.py .
 
 gatk3=/share/apps/GATK-distros/GATK_3.8.0/GenomeAnalysisTK.jar
 minMQS=20
@@ -257,6 +258,87 @@ TMP_DIR=/state/partition1/tmpdir
 
 source "$conda_bin_path"/deactivate
 
+
+
+
+#######################################################
+#remove duplicates and recalculate qc metrics/coverage#
+#######################################################
+
+#remove duplicates
+
+/share/apps/jre-distros/jre1.8.0_131/bin/java \
+    -XX:GCTimeLimit=50 \
+    -XX:GCHeapFreeLimit=10 \
+    -Djava.io.tmpdir=/state/partition1/tmpdir \
+    -Xmx2g \
+    -jar /share/apps/picard-tools-distros/picard-tools-2.18.5/picard.jar \
+    MarkDuplicates \
+    I="$sampleId"_Aligned_sorted.bam \
+    OUTPUT="$sampleId"_rmdup.bam \
+    METRICS_FILE="$sampleId"_markDuplicatesMetrics.txt \
+    CREATE_INDEX=true \
+    MAX_RECORDS_IN_RAM=2000000 \
+    VALIDATION_STRINGENCY=SILENT \
+    TMP_DIR=/state/partition1/tmpdir \
+    QUIET=true \
+    VERBOSITY=ERROR \
+    REMOVE_DUPLICATES=TRUE
+
+
+#Alignment metrics: library sequence similarity
+/share/apps/jre-distros/jre1.8.0_131/bin/java -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -Djava.io.tmpdir=/state/partition1/tmpdir -Xmx2g \
+    -jar /share/apps/picard-tools-distros/picard-tools-2.18.5/picard.jar CollectAlignmentSummaryMetrics \
+    R=/share/apps/star-fusion/GRCh37_gencode_v19_CTAT_lib_Mar272019.plug-n-play/ctat_genome_lib_build_dir/ref_genome.fa \
+    ADAPTER_SEQUENCE=AGATCGGAAGAGC \
+    I="$sampleId"_rmdup.bam \
+    O=../"$sampleId"_AlignmentSummaryMetrics_rmdup.txt \
+    MAX_RECORDS_IN_RAM=2000000 \
+TMP_DIR=/state/partition1/tmpdir
+
+
+
+#Calculate depth of coverage
+
+/share/apps/jre-distros/jre1.8.0_131/bin/java -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -Djava.io.tmpdir=/state/partition1/tmpdir -Xmx4g -jar $gatk3 \
+   -T DepthOfCoverage \
+   -R /share/apps/star-fusion/star-fusion-ref.fa \
+   -I  "$sampleId"_rmdup.bam \
+   -L RNAFusion-ROI_adapted.bed \
+   -o "$sampleId"_rmdup_DepthOfCoverage \
+   --countType COUNT_FRAGMENTS \
+   --minMappingQuality 20  \
+   --minBaseQuality 10 \
+   -ct 30  \
+   --omitLocusTable \
+   -dt NONE \
+   -U ALLOW_N_CIGAR_READS \
+   -rf ReassignOneMappingQuality -RMQF 255 -RMQT 60 \
+   -rf MappingQualityUnavailable
+
+
+
+#run coverageCalculatorPy
+
+source /home/transfer/miniconda3/bin/activate CoverageCalculatorPy
+
+sed 's/:/\t/g'  "$sampleId"_rmdup_DepthOfCoverage | grep -v 'Locus' | sort -k1,1 -k2,2n | bgzip > "$sampleId"_rmdup_DepthOfCoverage.gz
+
+tabix -b 2 -e 2 -s 1 "$sampleId"_rmdup_DepthOfCoverage.gz
+
+
+
+python /home/transfer/pipelines/CoverageCalculatorPy/CoverageCalculatorPy.py \
+-B RNAFusion-ROI_adapted.bed \
+-D /data/results/"$seqId"/RocheSTFusion/"$sampleId"/"$sampleId"_rmdup_DepthOfCoverage.gz \
+--padding 0 \
+--groupfile RNA_fusion_group_file.txt \
+--outname "$sampleId"_rmdup_coverage
+
+source "$conda_bin_path"/deactivate
+
+
+
 #######################################
 #Separate reports into referral types #
 #######################################
@@ -271,4 +353,31 @@ source "$conda_bin_path"/activate SomaticFusion
 python fusion_report_referrals.py /data/results/"$seqId"/RocheSTFusion/"$sampleId"/ $sampleId
 
 source "$conda_bin_path"/deactivate
+
+
+
+########################
+#create analysis sheets#
+########################
+
+
+expected =$(for i in /data/results/$seqId/$panel/*/*.variables; do echo $i; done | wc -l)
+
+complete=$(for i in /data/results/$seqId/$panel/*/Results/arriba_discarded/"+sampleId+"_fusion_report_"+referral+"_arriba_discarded.txt ; do echo $i; done | wc -l)
+
+if [$complete -eq $expected]; then
+
+    source "$conda_bin_path"/activate VirtualHood
+
+    ntc=$(for s in /data/results/$seqId/RocheSTFusion/*/; do echo $(basename $s);done | grep 'NTC')
+
+
+    if ($sampleId != $ntc):
+
+        python make_worksheets.py $seqId $sampleId $referral $ntc
+    fi
+
+    source "$conda_bin_path"/deactivate
+
+fi
 
