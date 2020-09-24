@@ -13,7 +13,7 @@ cd $PBS_O_WORKDIR
 # Usage: qsub run_star-fusion.sh [inside sample dir with .variables and \
 # .fastq.gz files]
 
-version=0.0.4
+version=0.0.6
 
 # source variables file
 . *.variables
@@ -178,8 +178,7 @@ arriba -x "$sampleId"_Aligned_sorted.bam \
 -o "$sampleId"_fusions_adapted.tsv \
 -b /home/transfer/miniconda3/envs/arriba/var/lib/arriba/blacklist_hg19_hs37d5_GRCh37_2018-11-04.tsv.gz \
 -O "$sampleId"_fusions_discarded_adapted.tsv \
--R 0 \
--f intragenic_exonic,same_gene
+-R 0 
 
 source "$conda_bin_path"/deactivate
 
@@ -407,10 +406,13 @@ fi
 if [ -f "$OUTPUT_DIR"/RMATS/SE.MATS.JC.txt ]; then
 
   # if no fusion are called assume error with RMATS
-  n_fusions=$(wc -l "$OUTPUT_DIR"/RMATS/SE.MATS.JC.txt)
-  if [[ $n_fusions < 3 ]]; then
+  n_fusions=$(cat "$OUTPUT_DIR"/RMATS/SE.MATS.JC.txt | wc -l)
+  echo "$n_fusions"
+  if [[ "$n_fusions" -lt 3 ]]; then
+    echo "EXITING!!"
     exit 1
   fi
+
 
   # read RMATS exon skipping report, extract MET and EGFR events
   while read ln; do
@@ -473,32 +475,46 @@ fi
 #create total_reads_list, contamination_list and analysis sheets#
 #################################################################
 
+cd /data/results/"$seqId"/RocheSTFusion
 
 expected=$(for i in /data/results/"$seqId"/"$panel"/*/*.variables; do echo $i; done | wc -l)
 
-complete=$(cat ../samples_list.txt| uniq | wc -l)
+complete=$(cat samples_list.txt| uniq | wc -l)
 
 if [ "$complete" -eq "$expected" ]; then
 
     #combine the total reads and total aligned reads information for all samples on the run
     python total_reads_list.py $seqId
 
+
+    #create samples_list in the same order as the samplesheet for the contamination check
+    scp /data/archive/fastq/"$seqId"/SampleSheet.csv .
+
+    grep -A 100 "^Sample_ID" SampleSheet.csv >> samples.csv
+
+    awk -F',' '{print $1}' samples.csv | grep -v "Sample_ID" >>samples_correct_order.txt
+
+
+
     #calculate contamination for run
-    #python contamination_check.py
+    python /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/contamination_check_arriba.py
+    python /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/contamination_check_star_fusion.py
+    python /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/combine_contamination_files.py
 
 
     #create analysis spreadsheets
 
-    #source "$conda_bin_path"/activate VirtualHood
+    source /home/transfer/miniconda3/bin/activate VirtualHood
 
-    #ntc=$(for s in /data/results/$seqId/RocheSTFusion/*/; do echo $(basename $s);done | grep 'NTC')
+    if [[ "$sampleId" != *"NTC"* ]]; then
 
-    #if ($sampleId != $ntc):
+        NTC_variable=NTC_"$worklistId"
 
-    #    python make_worksheets.py $sampleId $referral $ntc
-    #fi
+        python make_worksheets-updated.py $seqId $sampleId $referral "$NTC_variable"
+    fi
 
-    #source "$conda_bin_path"/deactivate
+
+    source "$conda_bin_path"/deactivate
 
 fi
 

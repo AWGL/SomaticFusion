@@ -9,7 +9,7 @@ generates a single text report and and IGV batch file for each sample
 
 Aurthor: Christopher Medway
 Created: 12th September 2019
-Version: 0.0.3
+Version: 0.0.6
 """
 
 import os
@@ -117,55 +117,53 @@ def fusion_report(args):
             junc_read_ct = int(sfln[1])
             span_frag_ct = int(sfln[2])
 
-            if large_anchor_support != 'NO_LDAS' and junc_read_ct > 0 and span_frag_ct > 0 and (
-                    junc_read_ct + span_frag_ct) > 2:
-                fusion = sfln[0]
-                left_breakpoint = sfln[5]
-                right_breakpoint = sfln[8]
-                num_counter_fusion_left = int(sfln[11])
-                num_counter_fusion_right = int(sfln[12])
+            fusion = sfln[0]
+            left_breakpoint = sfln[5]
+            right_breakpoint = sfln[8]
+            num_counter_fusion_left = int(sfln[11])
+            num_counter_fusion_right = int(sfln[12])
 
-                # caculate the fusion alleleic ratio (FAR)
-                fafL = (junc_read_ct + span_frag_ct) / (num_counter_fusion_left + junc_read_ct + span_frag_ct)
-                fafR = (junc_read_ct + span_frag_ct) / (num_counter_fusion_right + junc_read_ct + span_frag_ct)
-                faf = ((fafL + fafR) / 2)
+            # caculate the fusion alleleic ratio (FAR)
+            fafL = (junc_read_ct + span_frag_ct) / (num_counter_fusion_left + junc_read_ct + span_frag_ct)
+            fafR = (junc_read_ct + span_frag_ct) / (num_counter_fusion_right + junc_read_ct + span_frag_ct)
+            faf = ((fafL + fafR) / 2)
 
 
-                right_breakpoint = sfln[8]
+            right_breakpoint = sfln[8]
 
-                FFPM="none"
+            FFPM="none"
 
-                with open("./STAR-Fusion/star-fusion.fusion_predictions.abridged.tsv") as fusion_FFPM:
-                    headerline=fusion_FFPM.readline()
-                    for line in fusion_FFPM:
-                        fusion_FFPM_line=line.split('\t')
-                        if ((fusion_FFPM_line[5] == left_breakpoint) and (fusion_FFPM_line[7] == right_breakpoint)) :
-                            FFPM=fusion_FFPM_line[9]
+            with open("./STAR-Fusion/star-fusion.fusion_predictions.abridged.tsv") as fusion_FFPM:
+                headerline=fusion_FFPM.readline()
+                for line in fusion_FFPM:
+                    fusion_FFPM_line=line.split('\t')
+                    if ((fusion_FFPM_line[5] == left_breakpoint) and (fusion_FFPM_line[7] == right_breakpoint)) :
+                        FFPM=fusion_FFPM_line[9]
 
 
 
-                out.write(
-                    sfln[0] + "\t" +
-                    sfln[1] + "\t" +
-                    sfln[2] + "\t" +
-                    sfln[5] + "\t" +
-                    sfln[8] + "\t" +
-                    sfln[9] + "\t" +
-                    sfln[10] + "\t" +
-                    FFPM + "\t" +
-                    sfln[17] + "\t" +
-                    sfln[19] + "\t" +
-                    sfln[21] + "\t" +
-                    sfln[22] + "\t" +
-                    sfln[23] + "\t" +
-                    sfln[24] + "\t" +
-                    sfln[25] + "\t" +
-                    str(num_counter_fusion_left) + "\t" +
-                    str(num_counter_fusion_right) + "\t" +
-                    str(round(faf, 2)) + "\n"
-                )
+            out.write(
+                sfln[0] + "\t" +
+                sfln[1] + "\t" +
+                sfln[2] + "\t" +
+                sfln[5] + "\t" +
+                sfln[8] + "\t" +
+                sfln[9] + "\t" +
+                sfln[10] + "\t" +
+                FFPM + "\t" +
+                sfln[17] + "\t" +
+                sfln[19] + "\t" +
+                sfln[21] + "\t" +
+                sfln[22] + "\t" +
+                sfln[23] + "\t" +
+                sfln[24] + "\t" +
+                sfln[25] + "\t" +
+                str(num_counter_fusion_left) + "\t" +
+                str(num_counter_fusion_right) + "\t" +
+                str(round(faf, 2)) + "\n"
+            )
 
-        out.close()
+    out.close()
 
 
 if __name__ == '__main__':
