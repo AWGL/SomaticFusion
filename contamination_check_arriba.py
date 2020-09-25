@@ -13,11 +13,11 @@ Version: 0.0.6
 
 import pandas 
 
-samples = pandas.read_csv("samples_correct_order.txt", sep="\t")
+samples = pandas.read_csv("samples_list.txt", sep="\t")
 sampleList=samples["sampleId"].tolist()
 
 
-version=0.0.6
+
 
 sample_number=0
 
@@ -70,7 +70,7 @@ for sample in sampleList:
 
         #if contamination above is "yes", check to see if the fusion is in the referral type files 
 
-        referral_file=pandas.read_csv("/data/diagnostics/pipelines/SomaticFusion/SomaticFusion-"+version+"/Referrals/"+referral+".txt", sep="\t")
+        referral_file=pandas.read_csv("/data/diagnostics/pipelines/SomaticFusion/SomaticFusion-0.0.4/Referrals/"+referral+".txt", sep="\t")
         gene_list=list(referral_file['Genes'])
 
 
@@ -175,7 +175,11 @@ for sample in sampleList:
     elif (NTC_in_sample==True):
 	ntc_arriba_report=pandas.read_csv(sample+"/"+sample+"_fusions_adapted.tsv", sep="\t")
         len_ntc_arriba_report=len(ntc_arriba_report)
-	contamination_dataframe = contamination_dataframe.append({"Sample": sample, "Contamination_arriba": len_ntc_arriba_report, "Contamination_referral_arriba":len_ntc_arriba_report}, ignore_index=True)
+	contamination_NTC="No"
+	if (len_ntc_arriba_report>0):
+		contamination_NTC="Yes"
+ 		
+	contamination_dataframe = contamination_dataframe.append({"Sample": sample, "Contamination_arriba": contamination_NTC, "Contamination_referral_arriba":contamination_NTC}, ignore_index=True)
 
 	
 	
