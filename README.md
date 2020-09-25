@@ -19,11 +19,11 @@ qsub 1_SomaticFusion.sh
 
 There may be 2 worksheets on each run, with each run containing up to 48 samples, and a maximum of 24 samples per worksheet. 
 
-Each worksheet will have its own NTC which needs to be in the format NTC-<worksheetid>
+Each worksheet will have its own NTC which needs to be in the format NTC-{worksheetid}
   
   
 ### Sample directory
 
 Each sample directory must contain:
-- A variables file in the format <sampleId>.variables
+- A variables file in the format {sampleId}.variables
 - Zipped fastq files
