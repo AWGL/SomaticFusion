@@ -25,5 +25,5 @@ Each worksheet will have its own NTC which needs to be in the format NTC-<worksh
 ### Sample directory
 
 Each sample directory must contain:
-- A variables file in the format <sampleId>.varibles
+- A variables file in the format <sampleId>.variables
 - Zipped fastq files
