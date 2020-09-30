@@ -465,10 +465,19 @@ source "$conda_bin_path"/deactivate
 #Append sampleId to sample list#
 ################################
 
+
+#if [ ! -e /data/results/"$seqId"/"$panel"/samples_list.txt ]
+#then
+#    echo "sampleId" >> /data/results/"$seqId"/RocheSTFusion/samples_list.txt
+#fi
+
+
+
 if [ -e /data/results/"$seqId"/"$panel"/*/Results/arriba_discarded/"$sampleId"_fusion_report_NTRK3_arriba_discarded.txt ]
 then
     echo $sampleId >> /data/results/"$seqId"/RocheSTFusion/samples_list.txt
 fi
+
 
 
 #################################################################
@@ -477,23 +486,28 @@ fi
 
 cd /data/results/"$seqId"/RocheSTFusion
 
-expected=$(for i in /data/results/"$seqId"/"$panel"/*/*.variables; do echo $i; done | wc -l)
+#create samples_list in the same order as the samplesheet for the contamination check
+scp /data/archive/fastq/"$seqId"/SampleSheet.csv .
 
-complete=$(cat samples_list.txt| uniq | wc -l)
+grep -A 100 "^Sample_ID" SampleSheet.csv >> samples.csv
+
+awk -F',' '{print $1}' samples.csv | grep -v "Sample_ID" >>samples_correct_order.txt
+
+
+
+grep -v "sampleId" samples_list.txt >> samples_list_without_header.txt
+
+
+expected=$(cat samples_correct_order.txt| wc -l)
+
+complete=$(cat samples_list_without_header.txt| uniq | wc -l)
+
+
 
 if [ "$complete" -eq "$expected" ]; then
 
     #combine the total reads and total aligned reads information for all samples on the run
-    python total_reads_list.py $seqId
-
-
-    #create samples_list in the same order as the samplesheet for the contamination check
-    scp /data/archive/fastq/"$seqId"/SampleSheet.csv .
-
-    grep -A 100 "^Sample_ID" SampleSheet.csv >> samples.csv
-
-    awk -F',' '{print $1}' samples.csv | grep -v "Sample_ID" >>samples_correct_order.txt
-
+    python /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/total_reads_list.py $seqId
 
 
     #calculate contamination for run
@@ -502,19 +516,23 @@ if [ "$complete" -eq "$expected" ]; then
     python /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/combine_contamination_files.py
 
 
+
+    cat samples_list_without_header.txt | while read sample; do
+
+    cd /data/results/"$seqId"/RocheSTFusion/$sample
+
+    . *.variables
+
+
     #create analysis spreadsheets
 
     source /home/transfer/miniconda3/bin/activate VirtualHood
 
-    if [[ "$sampleId" != *"NTC"* ]]; then
+    if [[ "$sample" != *"NTC"* ]]; then
 
         NTC_variable=NTC_"$worklistId"
 
-        python make_worksheets-updated.py $seqId $sampleId $referral "$NTC_variable"
+        python make_worksheets.py $seqId $sample $referral "$NTC_variable" "$worklistId"
     fi
 
-
-    source "$conda_bin_path"/deactivate
-
-fi
 
