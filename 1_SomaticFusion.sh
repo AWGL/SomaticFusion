@@ -46,19 +46,6 @@ source "$conda_bin_path"/activate SomaticFusion
 # Preprocessing FASTQ #
 #######################
 
-#count how many core FASTQC tests failed
-countQCFlagFails() {
-    grep -E "Basic Statistics|Per base sequence quality|Per tile sequence quality|Per sequence quality scores|Per base N content" "$1" | \
-    grep -v ^PASS | \
-    grep -v ^WARN | \
-    wc -l | \
-    sed 's/^[[:space:]]*//g'
-}
-
-#record FASTQC pass/fail
-rawSequenceQuality=PASS
-
-
 
 for fastqPair in $(ls "$sampleId"_S*.fastq.gz | cut -d_ -f1-4 | sort | uniq); do
 
@@ -77,14 +64,8 @@ for fastqPair in $(ls "$sampleId"_S*.fastq.gz | cut -d_ -f1-4 | sort | uniq); do
     mv "$seqId"_"$sampleId"_"$laneId"_R1_fastqc/summary.txt "$seqId"_"$sampleId"_"$laneId"_R1_fastqc.txt
     mv "$seqId"_"$sampleId"_"$laneId"_R2_fastqc/summary.txt "$seqId"_"$sampleId"_"$laneId"_R2_fastqc.txt
 
-    #check FASTQC output
-    if [ $(countQCFlagFails "$seqId"_"$sampleId"_"$laneId"_R1_fastqc.txt) -gt 0 ] || [ $(countQCFlagFails "$seqId"_"$sampleId"_"$laneId"_R2_fastqc.txt) -gt 0 ]; then
-        rawSequenceQuality=FAIL
-    fi
 
 
-
- 
 
 ############
 # Run STAR #
@@ -466,10 +447,10 @@ source "$conda_bin_path"/deactivate
 ################################
 
 
-#if [ ! -e /data/results/"$seqId"/"$panel"/samples_list.txt ]
-#then
-#    echo "sampleId" >> /data/results/"$seqId"/RocheSTFusion/samples_list.txt
-#fi
+if [ ! -e /data/results/"$seqId"/"$panel"/samples_list.txt ]
+then
+    echo "sampleId" >> /data/results/"$seqId"/RocheSTFusion/samples_list.txt
+fi
 
 
 
@@ -515,6 +496,9 @@ if [ "$complete" -eq "$expected" ]; then
     python /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/contamination_check_star_fusion.py
     python /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/combine_contamination_files.py
 
+
+    #Create combinedQC file 
+    bash /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/compileQcReport.sh
 
 
     cat samples_list_without_header.txt | while read sample; do
