@@ -180,7 +180,7 @@ for sample in sampleList:
                                     for fusion_previous_referral in fusion_list_referral_previous:
                                         if (fusion_current_referral==fusion_previous_referral):
                                             contamination_referral="Yes"
-                                            contamination_referral_previous="Yes"
+
 
 
                         if (sample_number<(len_sample_list-1)):              
@@ -201,7 +201,7 @@ for sample in sampleList:
                                     for fusion_next_referral in fusion_list_referral_next:
                                         if (fusion_next_referral==fusion_next_referral):
                                             contamination_referral="Yes"
-                                            contamination_referral_next="Yes"
+
 
 
         #Replace the contamination values in the contamination dictionaries

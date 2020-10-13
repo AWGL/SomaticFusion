@@ -34,8 +34,7 @@ sample_number=0
 
 
 for sample in sampleList:
-    print(sample_number)
-    print(sample)
+
     NTC_in_sample= ("NTC" in sample)
 
     if (NTC_in_sample==False):
@@ -179,7 +178,7 @@ for sample in sampleList:
                                 report_referral_previous["Fusion_Name2"]=report_referral_previous["gene2"].str.cat(report_referral_previous["gene1"], sep="--")
                                 fusion_list_referral_previous2=report_referral_previous["Fusion_Name2"].tolist()
 
-
+ 
                                 #create list containing the fusions with genes in both orders for sample before
                                 fusion_list_referral_previous=fusion_list_referral_previous1+fusion_list_referral_previous2
 
@@ -189,7 +188,6 @@ for sample in sampleList:
                                     for fusion_previous_referral in fusion_list_referral_previous:
                                         if (fusion_current_referral==fusion_previous_referral):
                                             contamination_referral="Yes"
-                                            contamination_referral_previous="Yes"
 
 
                         if (sample_number<(len_sample_list-1)):              
@@ -202,7 +200,7 @@ for sample in sampleList:
                                 report_referral_next["gene1"]=report_referral_next["Fusion_Name"].str.split('--', expand=True)[0]
                                 report_referral_next["gene2"]=report_referral_next["Fusion_Name"].str.split('--', expand=True)[1]
                                 report_referral_next["Fusion_Name2"]=report_referral_next["gene2"].str.cat(report_referral_next["gene1"], sep="--")
-                                fusion_list_referral_next2=report_referral_next["Fusion_Name2"].tolist()
+                                fusion_list_referral_next2=report_referal_next["Fusion_Name2"].tolist()
 
                                 #create list containing the fusions with genes in both orders for sample after
                                 fusion_list_referral_next=fusion_list_referral_next1+fusion_list_referral_next2
@@ -213,7 +211,6 @@ for sample in sampleList:
                                     for fusion_next_referral in fusion_list_referral_next:
                                         if (fusion_next_referral==fusion_next_referral):
                                             contamination_referral="Yes"
-                                            contamination_referral_next="Yes"
 
 
 
@@ -228,15 +225,8 @@ for sample in sampleList:
             if (contamination_star_fusion_dict[sample_previous]=="No"):
                 contamination_star_fusion_dict[sample_previous]=contamination_previous
 
-
         if (contamination_referral_star_fusion_dict[sample]=="No"):
             contamination_referral_star_fusion_dict[sample]=contamination_referral
-        if (sample_number<(len_sample_list-1)):
-            if (contamination_referral_star_fusion_dict[sample_next]=="No"):
-                contamination_referral_star_fusion_dict[sample_next]=contamination_referral_next
-        if (sample_number!=0):
-            if (contamination_referral_star_fusion_dict[sample_previous]=="No"):
-                contamination_referral_star_fusion_dict[sample_previous]=contamination_referral_previous
 
 
     #calculate the level of contamination in the NTC. If the number of fusions for the panel genes is less 0, contamination is "No". Otherwise contamination is "Yes".
