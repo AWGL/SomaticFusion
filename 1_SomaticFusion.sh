@@ -467,23 +467,28 @@ fi
 
 cd /data/results/"$seqId"/RocheSTFusion
 
+if [ ! -e /data/results/"$seqId"/"$panel"/samples_correct_order.txt ]
+then
+    
+
 #create samples_list in the same order as the samplesheet for the contamination check
 scp /data/archive/fastq/"$seqId"/SampleSheet.csv .
 
 grep -A 100 "^Sample_ID" SampleSheet.csv >> samples.csv
 
-awk -F',' '{print $1}' samples.csv | grep -v "Sample_ID" >>samples_correct_order.txt
+awk -F',' '{print $1}' samples.csv >>samples_correct_order.txt
+
+fi
 
 
-
-grep -v "sampleId" samples_list.txt >> samples_list_without_header.txt
-
+grep -v "sampleId" samples_list.txt > samples_list_without_header.txt
 
 expected=$(cat samples_correct_order.txt| wc -l)
 
-complete=$(cat samples_list_without_header.txt| uniq | wc -l)
+complete=$(cat samples.csv| uniq | wc -l)
 
-
+echo $complete
+echo $expected
 
 if [ "$complete" -eq "$expected" ]; then
 
@@ -492,13 +497,14 @@ if [ "$complete" -eq "$expected" ]; then
 
 
     #calculate contamination for run
-    python /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/contamination_check_arriba.py
-    python /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/contamination_check_star_fusion.py
+    python /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/contamination_check_arriba.py $version
+    python /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/contamination_check_star_fusion.py $version
+    python /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/contamination_check_RMATS.py $seqId $version
     python /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/combine_contamination_files.py
 
 
     #Create combinedQC file 
-    bash /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/compileQcReport.sh
+    bash /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/compileQcReport.sh $seqId $panel
 
 
     cat samples_list_without_header.txt | while read sample; do
@@ -518,5 +524,6 @@ if [ "$complete" -eq "$expected" ]; then
 
         python make_worksheets.py $seqId $sample $referral "$NTC_variable" "$worklistId"
     fi
-
+done
+fi
 
