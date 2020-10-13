@@ -20,7 +20,7 @@ countQCFlagFails() {
 
 
 # make empty combined QC file
-echo -e "Sample\tFastQC" > /data/results/$seqId/$panel/combinedQC.txt
+echo -e "Sample\tFastQC" > /data/results/$seqId/$panel/combined_QC.txt
 
 
 # loop through each sample and make QC file
@@ -44,7 +44,7 @@ for sampleId in $(cat samples_list.txt); do
         done
 
         # add to combined QC file
-        echo -e "$sampleId\t$rawSequenceQuality" >> /data/results/$seqId/$panel/combinedQC.txt
+        echo -e "$sampleId\t$rawSequenceQuality" >> /data/results/$seqId/$panel/combined_QC.txt
 
     fi
 
