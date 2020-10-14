@@ -1,7 +1,0 @@
-Genes
-ALK
-ROS1
-RET
-NTRK1
-MET
-

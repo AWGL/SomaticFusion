@@ -1,4 +1,0 @@
-Genes
-ROS1
-NTRK1
-MET
