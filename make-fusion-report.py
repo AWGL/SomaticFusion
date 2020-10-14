@@ -9,7 +9,7 @@ generates a single text report and and IGV batch file for each sample
 
 Aurthor: Christopher Medway
 Created: 12th September 2019
-Version: 0.0.6
+Version: 1.0.0
 """
 
 import os

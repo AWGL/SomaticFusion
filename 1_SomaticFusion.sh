@@ -13,7 +13,7 @@ cd $PBS_O_WORKDIR
 # Usage: qsub run_star-fusion.sh [inside sample dir with .variables and \
 # .fastq.gz files]
 
-version=0.0.6
+version=1.0.0
 
 # source variables file
 . *.variables
@@ -480,8 +480,10 @@ awk -F',' '{print $1}' samples.csv >>samples_correct_order.txt
 
 fi
 
-
 grep -v "sampleId" samples_list.txt > samples_list_without_header.txt
+
+
+#if the sample is the final one on the run- calculate the total reads, contamination, quality and create the analysis sheets
 
 expected=$(cat samples_correct_order.txt| wc -l)
 
