@@ -524,7 +524,7 @@ if [ "$complete" -eq "$expected" ]; then
 
         NTC_variable=NTC_"$worklistId"
 
-        python make_worksheets.py $seqId $sample $referral "$NTC_variable" "$worklistId"
+        python make_worksheets.py $seqId $sample $referral "$NTC_variable" "$worklistId" "$version"
     fi
 done
 fi
