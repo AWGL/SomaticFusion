@@ -64,7 +64,7 @@ def get_referral_list(referral):
 
 def get_NTC_fusion_report(ntc):
 	
-	#get the NTC star fusion results for the sample's referral
+	#get the NTC star fusion results for all the genes in the samples referral type
 	ws6["A4"]="NTC STAR-Fusion results"
 	for referral in referral_list:
                 
@@ -81,7 +81,7 @@ def get_NTC_fusion_report(ntc):
 				print("NTC STAR-Fusion results cannot be found")
 
 
-	#get the NTC arriba results for the sample's referral
+	#get the NTC arriba results for all the genes in the samples referral type
 	ws6["A19"]="Arriba results"
 	for referral in referral_list:
 
@@ -103,7 +103,7 @@ def get_NTC_fusion_report(ntc):
 def get_star_fusion_report(referral_list, ntc_star_fusion_report):
 	ws1["A9"]="STAR-Fusion results"
 
-	#create empty pandas dataframe and append
+	#create empty pandas dataframe and append the STAR-Fusion results for all the genes in the sample's referral type
 
 	star_fusion_report_final= pandas.DataFrame(columns=["Fusion_Name", "Split_Read_Count", "Spanning_Read_Count", "Left_Breakpoint", "Right_Breakpoint", "SpliceType", "LargeAnchorSupport", "FFPM", "LeftBreakEntropy", "RightBreakEntropy","CDS_Left_ID", "CDS_Left_Range", "CDS_Right_ID", "CDS_Right_Range", "Prot_Fusion_Type","Num_WT_Fragments_Left", "Num_WT_Fragments_Right", "Fusion_Allelic_Fraction"]) 
 
@@ -138,6 +138,9 @@ def get_arriba_fusion_report(referral_list):
 
 	ws1["A23"]="Arriba results"
 
+
+	#create empty pandas dataframe and append the arriba results for all the genes in the sample's referral type
+
 	arriba_report_final= pandas.DataFrame(columns=["gene1", "gene2", "strand1(gene/fusion)", "strand2(gene/fusion)", "breakpoint1", "breakpoint2", "site1", "site2", "type", "direction1", "direction2", "split_reads1", "split_reads2", "discordant_mates", "coverage1", "coverage2", "confidence", "closest_genomic_breakpoint1", "closest_genomic_breakpoint2", "filters", "fusion_transcript", "reading_frame", "peptide_sequence", "read_identifiers"])
 
 	for referral in referral_list:
@@ -166,6 +169,9 @@ def get_arriba_fusion_report(referral_list):
 
 
 def get_ntc_total_coverage():
+
+	#get the ntc total coverage with and without duplicates 
+
 	if (os.stat("../"+ntc+"/"+ntc+"_coverage.totalCoverage").st_size!=0):
 		ntc_total_coverage=pandas.read_csv("../"+ntc+"/"+ntc+"_coverage.totalCoverage", sep="\t")
 		ntc_total_average_depth=ntc_total_coverage["AVG_DEPTH"]
@@ -182,6 +188,8 @@ def get_ntc_total_coverage():
 
 
 def get_total_coverage(ntc_total_average_depth, ntc_total_average_depth_rmdup):
+
+	#get the total coverage of the genes of interest with and without duplicates 
 	ws2["A2"]="with duplicates"
 	if (os.stat(sampleId+"_coverage.totalCoverage").st_size!=0):
 		total_coverage=pandas.read_csv(sampleId+"_coverage.totalCoverage", sep="\t")
@@ -208,6 +216,7 @@ def get_total_coverage(ntc_total_average_depth, ntc_total_average_depth_rmdup):
 
 def ntc_get_coverage():
 
+	#get the coverage of the regions of interest with and without duplicates in the ntc
 	if (os.stat("../"+ntc+"/"+ntc+"_coverage.coverage").st_size!=0):
 		ntc_coverage=pandas.read_csv("../"+ntc+"/"+ntc+"_coverage.coverage", sep="\t")
 		ntc_average_depth=ntc_coverage["AVG_DEPTH"]
@@ -226,6 +235,8 @@ def ntc_get_coverage():
 
 
 def get_coverage(referral, ntc_average_depth, ntc_average_depth_rmdup):
+
+	#get the coverage of the regions of interest with and without duplicates in the sample
 	if (os.stat(sampleId+"_coverage.coverage").st_size!=0):
 		coverage=pandas.read_csv(sampleId+"_coverage.coverage", sep="\t")
 		coverage["NTC_AVG_DEPTH"]=ntc_average_depth
@@ -449,7 +460,7 @@ def format_analysis_sheet(referral, coverage_rmdup):
 	ws5["G59"]="Conclusion 2"
 
 
-	#transfer the coverage values for EGFRv3 and MET_exon14_skipping events from the coverage report into the summary tab
+	#transfer the coverage values for EGFRv3 and MET_exon14_skipping events breakpoints from the coverage report into the summary tab
       
 	MET_exon_13=coverage_rmdup[coverage_rmdup["START"]==116411698]
 	del [MET_exon_13["META"], MET_exon_13["NTC_AVG_DEPTH"],MET_exon_13["%NTC contamination"]]
@@ -581,6 +592,7 @@ def format_analysis_sheet(referral, coverage_rmdup):
 	ws5['B44']='=Patient_demographics!O2'
 
 
+	#add pass, fail dropdown boxes to the summary sheet
 	dv = DataValidation(type="list", formula1='"PASS,FAIL"', allow_blank=True)
 	ws5.add_data_validation(dv)
 	dv.add('C44:C45')
