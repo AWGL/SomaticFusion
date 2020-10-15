@@ -448,6 +448,8 @@ def format_analysis_sheet(referral, coverage_rmdup):
 	ws5["F59"]="Conclusion 1"
 	ws5["G59"]="Conclusion 2"
 
+
+	#transfer the coverage values for EGFRv3 and MET_exon14_skipping events from the coverage report into the summary tab
       
 	MET_exon_13=coverage_rmdup[coverage_rmdup["START"]==116411698]
 	del [MET_exon_13["META"], MET_exon_13["NTC_AVG_DEPTH"],MET_exon_13["%NTC contamination"]]
@@ -460,6 +462,9 @@ def format_analysis_sheet(referral, coverage_rmdup):
 
 	EGFR_exon_8=coverage_rmdup[coverage_rmdup["END"]==55223532]
 	del [EGFR_exon_8["META"], EGFR_exon_8["NTC_AVG_DEPTH"], EGFR_exon_8["%NTC contamination"]]
+
+
+	#If the coverage over the MET_exon14_skipping and EGFRv3 breakpoints are greater than the thresholds, highlight them in red.
 
 	for row in dataframe_to_rows(MET_exon_13, header=False, index=False):
 		ws5.append(row)
@@ -753,7 +758,7 @@ def get_met_exon_skipping(referral_list):
 	ws8["P9"]="Comments"
 
 
-	#add the rmats report to the ntc report tab	
+	#add the rmats report to the RMATS report tab. Only add exon skipping events for genes that are in the referral type.
 	rmats=[]
 	headers=[]
 	line_number=0
@@ -876,7 +881,7 @@ def get_met_exon_skipping(referral_list):
 
 
 
-	#add the rmats ntc report to the ntc report tab
+	#add the rmats ntc report to the ntc report tab. Only add exon skipping events for genes that are in the referral type.
 	rmats_ntc=[]
 	headers=[]
 	line_number=0
@@ -934,4 +939,4 @@ if __name__ == "__main__":
 	format_analysis_sheet(referral, coverage_rmdup)
 	get_alignment_metrics_rmdup()
 	get_met_exon_skipping(referral_list)
-	wb.save(sampleId+"_"+referral +"_updated.xlsx")
+	wb.save("../"+sampleId+"_"+referral +"_updated.xlsx")
