@@ -790,7 +790,7 @@ def get_met_exon_skipping(referral_list):
 	rmats_dataframe=rmats_dataframe[['GeneID', 'geneSymbol', 'chr', 'exonStart_0base', 'exonEnd', 'IJC_SAMPLE_1', 'SJC_SAMPLE_1', 'IJC_SAMPLE_2', 'SJC_SAMPLE_2', 'FDR', 'IncLevel1', 'IncLevel2', 'IncLevelDifference']]
 
 
-	if (("MET_exon_14_skipping" in referral_list) or ("EGFRv3" in referral_list)):
+	if (("MET_exon14_skipping" in referral_list) or ("EGFRv3" in referral_list)):
 
 		for gene in referral_list:
 			if (gene=="MET_exon14_skipping"):
