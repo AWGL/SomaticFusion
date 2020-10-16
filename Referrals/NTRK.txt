@@ -1,5 +1,4 @@
 Genes
-ALK
-RET
 NTRK1
-MET
+NTRK2
+NTRK3
