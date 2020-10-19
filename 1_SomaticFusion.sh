@@ -438,7 +438,6 @@ source "$conda_bin_path"/activate SomaticFusion
 
 python fusion_report_referrals.py /data/results/"$seqId"/RocheSTFusion/"$sampleId"/ $sampleId
 
-source "$conda_bin_path"/deactivate
 
 
 
@@ -487,7 +486,7 @@ grep -v "sampleId" samples_list.txt > samples_list_without_header.txt
 
 expected=$(cat samples_correct_order.txt| wc -l)
 
-complete=$(cat samples.csv| uniq | wc -l)
+complete=$(cat samples_list_without_header.txt | uniq | wc -l)
 
 echo $complete
 echo $expected
@@ -507,6 +506,9 @@ if [ "$complete" -eq "$expected" ]; then
 
     #Create combinedQC file 
     bash /data/diagnostics/pipelines/SomaticFusion/SomaticFusion-$version/compileQcReport.sh $seqId $panel
+
+
+    source "$conda_bin_path"/deactivate
 
 
     cat samples_list_without_header.txt | while read sample; do
