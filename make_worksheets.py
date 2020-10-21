@@ -198,7 +198,7 @@ def get_total_coverage(ntc_total_average_depth, ntc_total_average_depth_rmdup):
 	if (os.stat(sampleId+"_coverage.totalCoverage").st_size!=0):
 		total_coverage=pandas.read_csv(sampleId+"_coverage.totalCoverage", sep="\t")
 		total_coverage["NTC_AVG_DEPTH"]=ntc_total_average_depth
-		total_coverage["%NTC contamination"]=(total_coverage["NTC_AVG_DEPTH"]/total_coverage["AVG_DEPTH"])*100
+		total_coverage["%NTC contamination"]=((total_coverage["NTC_AVG_DEPTH"].div(total_coverage["AVG_DEPTH"]).fillna(0)))*100
 		del total_coverage["PERC_COVERAGE@100"]
 		for row in dataframe_to_rows(total_coverage, header=True, index=False):
 			ws2.append(row)
@@ -209,10 +209,23 @@ def get_total_coverage(ntc_total_average_depth, ntc_total_average_depth_rmdup):
 		ws2["A32"]="without duplicates"
 		total_coverage_rmdup=pandas.read_csv(sampleId+"_rmdup_coverage.totalCoverage", sep="\t")
 		total_coverage_rmdup["NTC_AVG_DEPTH"]=ntc_total_average_depth_rmdup
-		total_coverage_rmdup["%NTC contamination"]=(total_coverage_rmdup["NTC_AVG_DEPTH"].div(total_coverage_rmdup["AVG_DEPTH"]).replace (numpy.inf,0))*100
+		total_coverage_rmdup["%NTC contamination"]=((total_coverage_rmdup["NTC_AVG_DEPTH"].div(total_coverage_rmdup["AVG_DEPTH"])).fillna(0))*100
 		del total_coverage_rmdup["PERC_COVERAGE@100"]
 		for row in dataframe_to_rows(total_coverage_rmdup, header=True, index=False):
 			ws2.append(row)
+
+
+		#highlight the cells in the percentage NTC contamination column red if the value is greater than 10%
+		colour= PatternFill("solid", start_color="00FF0000", end_color="00FF0000")
+		ws2.conditional_formatting.add('D4:D28', CellIsRule( operator='greaterThan', formula=['10'], stopIfTrue=True, fill=colour))
+
+
+		#highlight the cells in the percentage NTC contamination column red if the value is greater than 10%
+		colour= PatternFill("solid", start_color="00FF0000", end_color="00FF0000")
+		ws2.conditional_formatting.add('D34:D56', CellIsRule( operator='greaterThan', formula=['10'], stopIfTrue=True, fill=colour))
+
+
+
 	else:
 		print(" Total coverage file rmdup does not exist")
 	ws2.column_dimensions['A'].width=50
@@ -244,7 +257,7 @@ def get_coverage(referral, ntc_average_depth, ntc_average_depth_rmdup):
 	if (os.stat(sampleId+"_coverage.coverage").st_size!=0):
 		coverage=pandas.read_csv(sampleId+"_coverage.coverage", sep="\t")
 		coverage["NTC_AVG_DEPTH"]=ntc_average_depth
-		coverage["%NTC contamination"]=(coverage["NTC_AVG_DEPTH"]/coverage["AVG_DEPTH"])*100
+		coverage["%NTC contamination"]=((coverage["NTC_AVG_DEPTH"].div(coverage["AVG_DEPTH"])).fillna(0))*100
 		del coverage["PERC_COVERAGE@100"]
 		for row in dataframe_to_rows(coverage, header=True, index=False):
 			ws3.append(row)
@@ -259,7 +272,7 @@ def get_coverage(referral, ntc_average_depth, ntc_average_depth_rmdup):
 	if (os.stat(sampleId+"_rmdup_coverage.coverage").st_size!=0):
 		coverage_rmdup=pandas.read_csv(sampleId+"_rmdup_coverage.coverage", sep="\t")
 		coverage_rmdup["NTC_AVG_DEPTH"]=ntc_average_depth_rmdup
-		coverage_rmdup["%NTC contamination"]=(coverage_rmdup["NTC_AVG_DEPTH"]/coverage_rmdup["AVG_DEPTH"])*100
+		coverage_rmdup["%NTC contamination"]=((coverage_rmdup["NTC_AVG_DEPTH"].div(coverage_rmdup["AVG_DEPTH"])).fillna(0))*100
 		del coverage_rmdup["PERC_COVERAGE@100"]
 		for row in dataframe_to_rows(coverage_rmdup, header=True, index=False):
 			ws4.append(row)
