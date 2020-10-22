@@ -991,4 +991,4 @@ if __name__ == "__main__":
 
 	if (("MET_exon14_skipping" in referral_list) or ("EGFRv3" in referral_list)):
 		get_met_exon_skipping(referral_list)
-	wb.save("../"+sampleId+"_"+referral +"-TESTER.xlsx")
+	wb.save("../"+sampleId+"_"+referral +".xlsx")
