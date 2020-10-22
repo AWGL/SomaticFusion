@@ -6,7 +6,6 @@ fusion_report_referrals.py
 
 Author: Laura McCluskey
 Created: 5th May 2020
-Version: 1.0.0
 """
 
 import numpy
