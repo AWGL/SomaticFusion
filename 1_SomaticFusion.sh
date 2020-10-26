@@ -486,7 +486,7 @@ grep -v "sampleId" samples_list.txt > samples_list_without_header.txt
 
 expected=$(cat samples_correct_order.txt| wc -l)
 
-complete=$(cat samples_list_without_header.txt | uniq | wc -l)
+complete=$(cat samples_list.txt | uniq | wc -l)
 
 echo $complete
 echo $expected
