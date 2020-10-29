@@ -7,7 +7,6 @@ contamination_check.py
 
 Author: Laura McCluskey
 Created: 22nd Sept 2020
-Version: 0.0.6
 """
 
 
