@@ -13,7 +13,7 @@ cd $PBS_O_WORKDIR
 # Usage: qsub run_star-fusion.sh [inside sample dir with .variables and \
 # .fastq.gz files]
 
-version=1.0.1
+version="TESTER"
 
 # source variables file
 . *.variables
@@ -47,10 +47,10 @@ source "$conda_bin_path"/activate SomaticFusion
 #######################
 
 
-for fastqPair in $(ls "$sampleId"_S*.fastq.gz | cut -d_ -f1-4 | sort | uniq); do
+for fastqPair in $(ls "$sampleId"_S*.fastq.gz | cut -d_ -f1-3 | sort | uniq); do
 
     #parse fastq filenames
-    laneId=$(echo "$fastqPair" | cut -d_ -f4)
+    laneId=$(echo "$fastqPair" | cut -d_ -f3)
     read1Fastq=$(ls "$fastqPair"_R1_*fastq.gz)
     read2Fastq=$(ls "$fastqPair"_R2_*fastq.gz)
 
@@ -71,8 +71,6 @@ for fastqPair in $(ls "$sampleId"_S*.fastq.gz | cut -d_ -f1-4 | sort | uniq); do
 # Run STAR #
 ############
 
-sampleId_without_conc="$(echo $sampleId | cut -d'_' -f1)"
-
 
 STAR --chimSegmentMin 12 \
      --chimJunctionOverhangMin 12 \
@@ -87,7 +85,7 @@ STAR --chimSegmentMin 12 \
      --readFilesIn "$seqId"_"$sampleId"_"$laneId"_R1.fastq "$seqId"_"$sampleId"_"$laneId"_R2.fastq \
      --genomeDir /share/apps/star-fusion/GRCh37_gencode_v19_CTAT_lib_Mar272019.plug-n-play/ctat_genome_lib_build_dir/ref_genome.fa.star.idx  \
      --outFileNamePrefix "$seqId"_"$sampleId"_"$laneId"_ \
-     --outSAMattrRGline ID:"$sampleId" SM:"$sampleId_without_conc"
+     --outSAMattrRGline ID:"$sampleId" SM:"$sampleId"
 done
 
 
@@ -191,6 +189,7 @@ source "$conda_bin_path"/deactivate
 # Run CoverageCalculatorPy #
 ############################
 
+#depth of coverage file must only contain certain columns and be tabix indexed before running CoverageCalculatorPy (see github.com/AWGL/CoverageCalculatorPy)
 sed 's/:/\t/g'  "$seqId"_"$sampleId"_DepthOfCoverage | grep -v 'Locus' | sort -k1,1 -k2,2n | bgzip > "$seqId"_"$sampleId"_DepthOfCoverage.gz
 tabix -b 2 -e 2 -s 1 "$seqId"_"$sampleId"_DepthOfCoverage.gz
 
@@ -446,13 +445,14 @@ python fusion_report_referrals.py /data/results/"$seqId"/RocheSTFusion/"$sampleI
 ################################
 
 
+#create empty samples list file if it doesn't already exist
 if [ ! -e /data/results/"$seqId"/"$panel"/samples_list.txt ]
 then
     echo "sampleId" >> /data/results/"$seqId"/RocheSTFusion/samples_list.txt
 fi
 
 
-
+#if the NTRK arriba discarded file exists (showing the sample has completed the above processes), add sampleid to sample list
 if [ -e /data/results/"$seqId"/"$panel"/*/Results/arriba_discarded/"$sampleId"_fusion_report_NTRK3_arriba_discarded.txt ]
 then
     echo $sampleId >> /data/results/"$seqId"/RocheSTFusion/samples_list.txt
@@ -466,6 +466,8 @@ fi
 
 cd /data/results/"$seqId"/RocheSTFusion
 
+
+#check if samples_correct_order.txt already exists 
 if [ ! -e /data/results/"$seqId"/"$panel"/samples_correct_order.txt ]
 then
     
@@ -473,6 +475,8 @@ then
 #create samples_list in the same order as the samplesheet for the contamination check
 scp /data/archive/fastq/"$seqId"/SampleSheet.csv .
 
+
+#Get the samples column from the samplesheet and add to a new file
 grep -A 100 "^Sample_ID" SampleSheet.csv >> samples.csv
 
 awk -F',' '{print $1}' samples.csv >>samples_correct_order.txt
@@ -524,7 +528,7 @@ if [ "$complete" -eq "$expected" ]; then
 
     if [[ "$sample" != *"NTC"* ]]; then
 
-        NTC_variable=NTC_"$worklistId"
+        NTC_variable=NTC-"$worklistId"
 
         python make_worksheets.py $seqId $sample $referral "$NTC_variable" "$worklistId" "$version"
     fi
