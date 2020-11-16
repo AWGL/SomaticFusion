@@ -59,7 +59,7 @@ ws5['H5'].number_format='mm-dd-yy'
 def get_referral_list(referral):
 	
 	#get the genes in the referral file for the sample
-	referral_file=pandas.read_csv("/data/diagnostics/pipelines/SomaticFusion/SomaticFusion-"+version+"/Referrals/"+referral+".txt", sep="\t")
+	referral_file=pandas.read_csv("/data/diagnostics/pipelines/SomaticFusion/SomaticFusion-"+version+"/RocheSTFusion/Referrals/"+referral+".txt", sep="\t")
 	referral_list=list(referral_file['Genes'])
 	return(referral_list)
 
@@ -302,7 +302,7 @@ def get_coverage(referral, ntc_average_depth, ntc_average_depth_rmdup):
 
 def format_analysis_sheet(referral, coverage_rmdup):
 
-
+	#add headings to gene fusion report tab
 	ws1['A5']=sampleId
 	ws1['B5']='=Patient_demographics!C2'
 	ws1['C5']=referral
@@ -318,14 +318,16 @@ def format_analysis_sheet(referral, coverage_rmdup):
 	ws1['Z24']="Conclusion checker 2"
 	ws1['AA24']="Comments"
 
+
+	#Add a dropdown box in the conclusion columns of the gene fusion report tab
 	dv = DataValidation(type="list", formula1='"Genuine,Artefact,Fail_QC,no fusions"', allow_blank=True)
 	ws1.add_data_validation(dv)
-
 	dv.add('S11:S21')
 	dv.add('T11:T21')
 	dv.add('Y25:Y35')
 	dv.add('Z21:Z35')
 
+	#make the headings bold in the gene fusion report tab
 	font_bold=Font(bold=True)
 	position= ['A4', 'B4', 'C4', 'D4', 'E4', 'F4', 'G4', 'A39',
 	'A10','B10','C10','D10','E10','F10','G10','H10','I10','J10','K10','L10','M10','N10','O10','P10','Q10','R10','S10','T10', 'U10',
@@ -334,67 +336,69 @@ def format_analysis_sheet(referral, coverage_rmdup):
 		ws1[cell].font=font_bold
 
 
-	for column in ['A','B', 'Q']:
-		ws5.column_dimensions[column].width=25
-
+	#change the width of columns in the gene fusion report tab
 	for column in ['A','B', 'C','D','E', 'F','G', 'H', 'I', 'J','K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y']:
 		ws1.column_dimensions[column].width=20	
 
+	#add borders around the cells in the gene fusion report tab
 	border_a=Border(left=Side(border_style=BORDER_MEDIUM), right=Side(border_style=BORDER_MEDIUM), top=Side(border_style=BORDER_MEDIUM), bottom=Side(border_style=BORDER_MEDIUM))
 	position=['A4','B4','C4','D4','E4','F4','G4','A5','B5','C5','D5','E5','F5','G5','A10','B10','C10','D10','E10','F10','G10','H10','I10','J10','K10','L10','M10','N10','O10','P10','Q10','R10','S10','T10','U10',
 	'A24','B24','C24','D24','E24','F24','G24','H24','I24','J24','K24','L24','M24','N24','O24','P24','Q24','R24','S24','T24','U24','V24','W24','X24','Y24', 'Z24', 'AA24']
 	for cell in position:
 		ws1[cell].border=border_a
 
+	#colour the STAR-Fusion and arriba results headers around the cells in the gene fusion report tab
 	colour= PatternFill("solid", fgColor="DCDCDC")
 	position= ['A10','B10','C10','D10','E10','F10','G10','H10','I10','J10','K10','L10','M10','N10','O10','P10','Q10','R10',
 	'A24','B24','C24','D24','E24','F24','G24','H24','I24','J24','K24','L24','M24','N24','O24','P24','Q24','R24','S24','T24','U24','V24','W24','X24']
 	for cell in position:
 		ws1[cell].fill=colour
 
-
+	#colour the conclusion headers orange in the gene fusion report tab
 	colour= PatternFill("solid", fgColor="00FFCC00")
 	position= ['F4', 'G4', 'S10', 'T10', 'U10', 'Y24', 'Z24', 'AA24']
 	for cell in position:
 		ws1[cell].fill=colour
 
+	#colour the patient demographics headings blue in the gene fusion tab
 	colour= PatternFill("solid", fgColor="00CCFFFF")
 	position= ['A4','B4','C4','D4','E4']
 	for cell in position:
 		ws1[cell].fill=colour
 
-
+	# colour in NTC check headings grey in the total coverage tab
 	colour= PatternFill("solid", fgColor="DCDCDC")
 	position= ['I7', 'I8']
 	for cell in position:
 		ws2[cell].fill=colour
 
-
+	#colour the Result and Comments headings blue in the total coverage tab
 	colour= PatternFill("solid", fgColor="00CCFFFF")
 	position= ['J6', 'K6']
 	for cell in position:
 		ws2[cell].fill=colour
 
-
+	#add headings to the total coverage tab
 	ws2['G3']="Total mapped reads (including duplicates)"
 	ws2['I7']="NTC check 1"
 	ws2['I8']="NTC check 2"
 	ws2['J6']="Result"
 	ws2['K6']= "Comments"
 
-
+	#add result dropdown box to the total coverage tab
 	dv = DataValidation(type="list", formula1='"PASS,FAIL,PARTIAL_FAIL"', allow_blank=True)
 	ws2.add_data_validation(dv)
 	dv.add(ws2['J7'])
 	dv.add(ws2['J8'])
 
-
+	#add borders to the total coverage tab
 	border_a=Border(left=Side(border_style=BORDER_MEDIUM), right=Side(border_style=BORDER_MEDIUM), top=Side(border_style=BORDER_MEDIUM), bottom=Side(border_style=BORDER_MEDIUM))
 	position=['I7', 'I8', 'J6', 'J7', 'J8', 'K6', 'K7', 'K8']
 	for cell in position:
 		ws2[cell].border=border_a
 
-
+	
+	#add headings to the summary tab
 	ws5['C1']='Analysis Sheet-Pan RNA Cancer Fusion Panel'
 	ws5['C1'].font=Font(size=16)
 	ws5["A3"]="Lab number" 
@@ -462,9 +466,8 @@ def format_analysis_sheet(referral, coverage_rmdup):
 	for row in range(55):
 		ws5.row_dimensions[row].height=30
 
-
-
 	
+	#add borders to the summary tab
 	border_a=Border(left=Side(border_style=BORDER_MEDIUM), right=Side(border_style=BORDER_MEDIUM), top=Side(border_style=BORDER_MEDIUM), bottom=Side(border_style=BORDER_MEDIUM))
 	position=['A3','B3','C3','D3','E3','F3','G3', 'H3',
 	'A4','B4','C4','D4','E4','F4', 'G4','H4',
@@ -478,7 +481,7 @@ def format_analysis_sheet(referral, coverage_rmdup):
 	for cell in position:
 		ws5[cell].border=border_a
 
-
+	#colour the table headings of the summary tab grey
 	colour= PatternFill("solid", fgColor="DCDCDC")
 	position= ['A8', 'B8', 'C8', 'D8', 'E8', 'F8', 'G8', 'H8', 'I8', 'J8', 'K8', 'L8', 'M8','N8',
                    'A22', 'B22', 'C22', 'D22', 'E22', 'F22', 'G22', 'H22', 'I22', 'J22', 'K22', 'L22' , 'M22', 'N22',
@@ -486,20 +489,20 @@ def format_analysis_sheet(referral, coverage_rmdup):
 	for cell in position:
 		ws5[cell].fill=colour
 
-
+	#colour the patient demographics headings in the summary tab blue
 	colour= PatternFill("solid", fgColor="00CCFFFF")
 	position= ['A3','B3','C3','D3','E3','F3', 'G3', 'H3', 'I3','J3']
 	for cell in position:
 		ws5[cell].fill=colour
 
 
-
+	#colour the NTC check and conclusion headers of the summary tab orange
 	colour= PatternFill("solid", fgColor="00FFCC00")
 	position= ['K3', 'L3', 'M3', 'N3', 'O8', 'P8', 'Q8', 'O22', 'P22', 'Q22','C37', 'D37']
 	for cell in position:
 		ws5[cell].fill=colour
 
-
+	#make the headings of the tables in the summary tab bold
 	font_bold=Font(bold=True)
 	position= ['A3','B3','C3','D3','E3','F3','G3','H3','I3','J3','K3','L3','M3','N3','A8','B8','C8','D8','E8','F8','G8','H8','I8', 'J8', 'O8','P8', 'Q8',
 		'A22','B22','C22','D22','E22','F22','G22','H22','I22', 'J22', 'K22', 'L22', 'M22', 'N22', 'O22', 'P22', 'Q22',
@@ -510,7 +513,8 @@ def format_analysis_sheet(referral, coverage_rmdup):
 	for cell in position:
 		ws5[cell].font=font_bold
 
-
+	
+	#add headings to the summary tab
 	ws5['A4']=sampleId
 	ws5['B4']= '=Patient_demographics!C2'
 	ws5['C4']= '=Patient_demographics!I2'
@@ -537,8 +541,12 @@ def format_analysis_sheet(referral, coverage_rmdup):
 	dv.add('G48:G51')
 
 
-	#transfer values in star-fusion table of gene fusion report to the summary tab
+	#change the width of the columns in the summary tab
+	for column in ['A','B', 'Q']:
+		ws5.column_dimensions[column].width=25
 
+
+	#transfer values in star-fusion table of gene fusion report to the summary tab
 	summary_column_list=['A', 'B','C','D','E','F','G','H','I','J', 'O', 'P', 'Q']
 	fusion_report_column_list=[ 'A','B','C','D','E','F','G','H','O', 'R', 'S', 'T', 'U']
 
@@ -591,48 +599,10 @@ def format_analysis_sheet(referral, coverage_rmdup):
 		value=value+1
 
 
-	font_bold=Font(bold=True)
-	position= ['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','L1','M1','N1','O1','P1','Q1','R1','S1','T1','U1','V1']
-	for cell in position:
-		ws7[cell].font=font_bold
-
-
-	colour= PatternFill("solid", fgColor="DCDCDC")
-	position= ['A1','D1','F1','G1','H1','I1','J1','K1','L1','M1','N1','O1','P1','Q1','R1','S1','T1','U1','V1']
-	for cell in position:
-		ws7[cell].fill=colour
-
-	colour= PatternFill("solid", fgColor="00FFFF00")
-	position= ['B1', 'C1', 'E1', 'B2', 'C2', 'E2', 'O1', 'O2']
-	for cell in position:
-		ws7[cell].fill=colour
-
-
-	colour= PatternFill("solid", fgColor="00FFCC00")
-	position= ['A6', 'A7']
-	for cell in position:
-		ws7[cell].fill=colour
-
-
-	border_a=Border(left=Side(border_style=BORDER_MEDIUM), right=Side(border_style=BORDER_MEDIUM), top=Side(border_style=BORDER_MEDIUM), bottom=Side(border_style=BORDER_MEDIUM))
-	position=['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','L1','M1','N1','O1','P1','Q1','R1','S1','T1','U1','V1', 'A6', 'A7', 'B6', 'B7']
-	for cell in position:
-		ws7[cell].border=border_a
-
-
-	ws7['B2']=sampleId
-	ws7['E2']=referral
-	ws7['M2']=worksheetId
-	ws7['N2']=seqId
-
-
-	ws7.column_dimensions['A'].width=30
-	ws7.column_dimensions['B'].width=20
-	ws7.column_dimensions['C'].width=30
-	ws7.column_dimensions['N'].width=40
 
 
 	#format the summary spreadsheet by wrapping text, middle aligning and aligning left
+
 	for row in ws5.iter_rows(min_row=3, max_row=4):
 			for cell in row:
 				cell.alignment=Alignment(wrap_text=True, horizontal='left', vertical='center')
@@ -664,6 +634,50 @@ def format_analysis_sheet(referral, coverage_rmdup):
 		row=ws5[value]
 		for cell in row:
 			cell.alignment=Alignment(horizontal='left', vertical='center')
+
+
+	#make the headings in the patient demographics tab bold
+	font_bold=Font(bold=True)
+	position= ['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','L1','M1','N1','O1','P1','Q1','R1','S1','T1','U1','V1']
+	for cell in position:
+		ws7[cell].font=font_bold
+
+	#colour the headings in the patient demographics tab grey
+	colour= PatternFill("solid", fgColor="DCDCDC")
+	position= ['A1','D1','F1','G1','H1','I1','J1','K1','L1','M1','N1','O1','P1','Q1','R1','S1','T1','U1','V1']
+	for cell in position:
+		ws7[cell].fill=colour
+
+	#colour cells in the patient demographics tab yellow to highlight the important information
+	colour= PatternFill("solid", fgColor="00FFFF00")
+	position= ['B1', 'C1', 'E1', 'B2', 'C2', 'E2', 'O1', 'O2']
+	for cell in position:
+		ws7[cell].fill=colour
+
+	#highlight the checker cells orange in the patient demographics tab
+	colour= PatternFill("solid", fgColor="00FFCC00")
+	position= ['A6', 'A7']
+	for cell in position:
+		ws7[cell].fill=colour
+
+	#add a border around the table in the patients demographics tab
+	border_a=Border(left=Side(border_style=BORDER_MEDIUM), right=Side(border_style=BORDER_MEDIUM), top=Side(border_style=BORDER_MEDIUM), bottom=Side(border_style=BORDER_MEDIUM))
+	position=['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','L1','M1','N1','O1','P1','Q1','R1','S1','T1','U1','V1', 'A6', 'A7', 'B6', 'B7']
+	for cell in position:
+		ws7[cell].border=border_a
+
+	#add variables to the patient demographics tab
+	ws7['B2']=sampleId
+	ws7['E2']=referral
+	ws7['M2']=worksheetId
+	ws7['N2']=seqId
+
+	
+	#change the column widths in the patient demographics tab
+	ws7.column_dimensions['A'].width=30
+	ws7.column_dimensions['B'].width=20
+	ws7.column_dimensions['C'].width=30
+	ws7.column_dimensions['N'].width=40
 
 
 def get_alignment_metrics_rmdup():
@@ -700,8 +714,8 @@ def get_alignment_metrics_rmdup():
 
 def get_met_exon_skipping(referral_list):
 
+	#add headers to the RMATS tab
 	ws8=wb.create_sheet("RMATS")
-
 	ws8['A4']='Lab number'
 	ws8['B4']='Patient Name'
 	ws8['C4']='Reason for referral'
@@ -737,6 +751,8 @@ def get_met_exon_skipping(referral_list):
 	ws8["O9"]="Conclusion checker 2"
 	ws8["P9"]="Comments"
 
+
+	#add the RMATS headings to the summary tab
 	ws5["A41"]="Intragenic fusions(RMATS) genuine calls"
 	ws5['A46']="Intragenic fusions quality metrics"
 	ws5["A42"]="geneSymbol"
@@ -761,19 +777,20 @@ def get_met_exon_skipping(referral_list):
 	ws5["G47"]="Conclusion 2"
 
 
-
+	#colour the intragenic fusion headers grey in the summary tab
 	colour= PatternFill("solid", fgColor="DCDCDC")
 	position= ['A42', 'B42', 'C42', 'D42', 'E42', 'F42', 'G42', 'H42', 'I42', 'J42', 'K42', 'L42', 'M42', 'N42', 
                    'A47', 'B47', 'C47', 'D47', 'E47' ]
 	for cell in position:
 		ws5[cell].fill=colour
 
+	#colour the conclusion headings of the intragenic fusion tables
 	colour= PatternFill("solid", fgColor="00FFCC00")
 	position= ['O42', 'P42', 'Q42', 'F47', 'G47']
 	for cell in position:
 		ws5[cell].fill=colour
 
-	
+	#add a border to the intragenic fusion tables in the summary tab
 	border_a=Border(left=Side(border_style=BORDER_MEDIUM), right=Side(border_style=BORDER_MEDIUM), top=Side(border_style=BORDER_MEDIUM), bottom=Side(border_style=BORDER_MEDIUM))
 	position=['A42','B42','C42','D42','E42','F42','G42', 'H42', 'I42', 'J42', 'K42', 'L42', 'M42', 'N42', 'O42', 'P42', 'Q42',
         'A47','B47','C47','D47','E47','F47','G47']
@@ -803,7 +820,7 @@ def get_met_exon_skipping(referral_list):
 
 
 
-
+	
 	for gene in referral_list:
 		if (gene=="MET_exon14_skipping"):
 			rmats_MET=rmats_dataframe[rmats_dataframe["geneSymbol"]=="MET"]
@@ -845,6 +862,7 @@ def get_met_exon_skipping(referral_list):
 
 	
 
+	#change the column dimensions of RMATS tab
 	ws8.column_dimensions['A'].width=30
 	ws8.column_dimensions['B'].width=15
 	ws8.column_dimensions['C'].width=15
@@ -855,35 +873,37 @@ def get_met_exon_skipping(referral_list):
 	for column in ['D','E', 'F','G','J', 'k','M', 'N', 'O', 'P','Q']:
 		ws8.column_dimensions[column].width=20
 
-
+	#make the headers bold in the RMATS tab
 	font_bold=Font(bold=True)
 	position= ['A4','B4','C4','D4','E4','F4','G4','A8','B8','C8','D8','E8','F8','G8','H8','I8','J8','K8','L8','M8','N8','O8','P8','Q8']
 	for cell in position:
 		ws8[cell].font=font_bold
 
-
+	#add a border to the RMATS tab
 	border_a=Border(left=Side(border_style=BORDER_MEDIUM), right=Side(border_style=BORDER_MEDIUM), top=Side(border_style=BORDER_MEDIUM), bottom=Side(border_style=BORDER_MEDIUM))
 	position=['A4','B4','C4','D4','E4','F4','G4','A5','B5','C5','D5','E5','F5','G5','A9','B9','C9','D9','E9','F9','G9','H9','I9','J9','K9','L9','M9','N9','O9','P9']
 	for cell in position:
 		ws8[cell].border=border_a
 
+	#colour the header of the RMATS tab grey
 	colour= PatternFill("solid", fgColor="DCDCDC")
 	position= ['A9','B9','C9','D9','E9','F9','G9','H9','I9','J9','K9','L9','M9','N9','O9','P9']
 	for cell in position:
 		ws8[cell].fill=colour
 
-
+	#colour the patient demographics headings of the RMATS tab blue 
 	colour= PatternFill("solid", fgColor="00CCFFFF")
 	position= ['A4','B4','C4','D4','E4','F4', 'G4']
 	for cell in position:
 		ws8[cell].fill=colour
 
+	#colour the conclusion headings of the RMATS tab orange
 	colour= PatternFill("solid", fgColor="00FFCC00")
 	position= ['N9', 'O9', 'P9']
 	for cell in position:
 		ws8[cell].fill=colour
 
-	
+	#Add RMATS headings in the NTC fusion report tab
 	ws6['A33']= "RMATS results"
 	ws6["A34"]="GeneID"
 	ws6["B34"]="geneSymbol"
@@ -939,7 +959,7 @@ def get_met_exon_skipping(referral_list):
 				ws6['B36']="EGFR v3-No fusions called"
 
 
-#transfer the coverage values for EGFRv3 and MET_exon14_skipping events breakpoints from the coverage report into the summary tab
+	#transfer the coverage values for EGFRv3 and MET_exon14_skipping events breakpoints from the coverage report into the summary tab
       
 	MET_exon_13=coverage_rmdup[coverage_rmdup["START"]==116411698]
 	del [MET_exon_13["META"], MET_exon_13["NTC_AVG_DEPTH"],MET_exon_13["%NTC contamination"]]
@@ -1003,8 +1023,8 @@ def get_met_exon_skipping(referral_list):
 	ws5["E50"]="EGFR_Exon1_last10bases"
 	ws5["E51"]="EGFR_Exon8_first10bases"
 
-	#format the RMATS part of the summary spreadsheet by wrapping text, middle aligning and aligning left
 
+	#format the RMATS part of the summary spreadsheet by wrapping text, middle aligning and aligning left
 	for row in ws5.iter_rows(min_row=47, max_row=51):
 		for cell in row:
 			cell.alignment=Alignment(wrap_text=True, horizontal='left', vertical='center')
