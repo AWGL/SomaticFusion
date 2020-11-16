@@ -580,13 +580,13 @@ def format_analysis_sheet(referral, coverage_rmdup):
 		ws5[summary_column+'25']= '=IF(OR(Gene_fusion_report!Y27<>"Artefact",Gene_fusion_report!Z27<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'27, "")'
 		ws5[summary_column+'26']= '=IF(OR(Gene_fusion_report!Y28<>"Artefact",Gene_fusion_report!Z28<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'28, "")'
 		ws5[summary_column+'27']= '=IF(OR(Gene_fusion_report!Y29<>"Artefact",Gene_fusion_report!Z29<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'29, "")'
-		ws5[summary_column+'27']= '=IF(OR(Gene_fusion_report!Y30<>"Artefact",Gene_fusion_report!Z30<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'30, "")'
-		ws5[summary_column+'28']= '=IF(OR(Gene_fusion_report!Y31<>"Artefact",Gene_fusion_report!Z31<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'31, "")'
-		ws5[summary_column+'29']= '=IF(OR(Gene_fusion_report!Y32<>"Artefact",Gene_fusion_report!Z32<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'32, "")'
-		ws5[summary_column+'30']= '=IF(OR(Gene_fusion_report!Y33<>"Artefact",Gene_fusion_report!Z33<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'33, "")'
-		ws5[summary_column+'31']= '=IF(OR(Gene_fusion_report!Y34<>"Artefact",Gene_fusion_report!Z34<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'34, "")'
-		ws5[summary_column+'32']= '=IF(OR(Gene_fusion_report!Y35<>"Artefact",Gene_fusion_report!Z35<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'35, "")'
-		ws5[summary_column+'33']= '=IF(OR(Gene_fusion_report!Y36<>"Artefact",Gene_fusion_report!Z36<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'36, "")'
+		ws5[summary_column+'28']= '=IF(OR(Gene_fusion_report!Y30<>"Artefact",Gene_fusion_report!Z30<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'30, "")'
+		ws5[summary_column+'29']= '=IF(OR(Gene_fusion_report!Y31<>"Artefact",Gene_fusion_report!Z31<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'31, "")'
+		ws5[summary_column+'30']= '=IF(OR(Gene_fusion_report!Y32<>"Artefact",Gene_fusion_report!Z32<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'32, "")'
+		ws5[summary_column+'31']= '=IF(OR(Gene_fusion_report!Y33<>"Artefact",Gene_fusion_report!Z33<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'33, "")'
+		ws5[summary_column+'32']= '=IF(OR(Gene_fusion_report!Y34<>"Artefact",Gene_fusion_report!Z34<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'34, "")'
+		ws5[summary_column+'33']= '=IF(OR(Gene_fusion_report!Y35<>"Artefact",Gene_fusion_report!Z35<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'35, "")'
+		ws5[summary_column+'34']= '=IF(OR(Gene_fusion_report!Y36<>"Artefact",Gene_fusion_report!Z36<>"Artefact"),Gene_fusion_report!'+fusion_report_column+'36, "")'
 
 		value=value+1
 
