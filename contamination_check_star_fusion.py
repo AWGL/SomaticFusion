@@ -199,7 +199,7 @@ for sample in sampleList:
                                 report_referral_next["gene1"]=report_referral_next["Fusion_Name"].str.split('--', expand=True)[0]
                                 report_referral_next["gene2"]=report_referral_next["Fusion_Name"].str.split('--', expand=True)[1]
                                 report_referral_next["Fusion_Name2"]=report_referral_next["gene2"].str.cat(report_referral_next["gene1"], sep="--")
-                                fusion_list_referral_next2=report_referal_next["Fusion_Name2"].tolist()
+                                fusion_list_referral_next2=report_referral_next["Fusion_Name2"].tolist()
 
                                 #create list containing the fusions with genes in both orders for sample after
                                 fusion_list_referral_next=fusion_list_referral_next1+fusion_list_referral_next2
