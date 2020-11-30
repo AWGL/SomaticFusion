@@ -806,14 +806,15 @@ def get_met_exon_skipping(referral_list):
 
 	for gene in referral_list:
 		if (gene=="MET_exon14_skipping"):
-			rmats_MET=rmats_dataframe[rmats_dataframe["geneSymbol"]=="MET"]
+			rmats_MET=rmats_dataframe[rmats_dataframe["geneSymbol"]=='"MET"']
+			print(rmats_MET)
 			if (len(rmats_MET)>0):
 				for row in dataframe_to_rows(rmats_MET, header=False, index=False):
 					ws8.append(row)
 			else:
 				ws8['B10']="MET ex14 skipping-No fusions called"
 		if (gene=="EGFRv3"):
-			rmats_EGFR=rmats_dataframe[rmats_dataframe["geneSymbol"]=="EGFR"]
+			rmats_EGFR=rmats_dataframe[rmats_dataframe["geneSymbol"]=='"EGFR"']
 			if (len(rmats_EGFR)>0):
 				for row in dataframe_to_rows(rmats_EGFR, header=False, index=False):
 					ws8.append(row)
