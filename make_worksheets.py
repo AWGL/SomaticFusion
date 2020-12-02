@@ -14,11 +14,11 @@ from openpyxl.styles import Alignment
 wb=Workbook()
 ws7=wb.create_sheet("Patient_demographics")
 ws6= wb.create_sheet("NTC fusion report")
-ws2=wb.create_sheet("total_coverage")
 ws1= wb.create_sheet("Gene_fusion_report")
 ws5=wb.create_sheet("Summary")
 ws3=wb.create_sheet("coverage_with_duplicates")
 ws4=wb.create_sheet("coverage_without_duplicates")
+ws2=wb.create_sheet("total_coverage")
 
 ws1["A4"]="Lab number"
 ws1["B4"]="Patient name"
@@ -230,7 +230,6 @@ def get_total_coverage(ntc_total_average_depth, ntc_total_average_depth_rmdup):
 		ws2.conditional_formatting.add('D34:D56', CellIsRule( operator='greaterThan', formula=['10'], stopIfTrue=True, fill=colour))
 
 
-
 	else:
 		print(" Total coverage file rmdup does not exist")
 	ws2.column_dimensions['A'].width=50
@@ -296,11 +295,11 @@ def get_coverage(referral, ntc_average_depth, ntc_average_depth_rmdup):
 	ws3.column_dimensions['D'].width=110
 	ws4.column_dimensions['D'].width=110
 
-	return(coverage_rmdup)
+	return(coverage_rmdup, coverage)
 
 
 
-def format_analysis_sheet(referral, coverage_rmdup):
+def format_analysis_sheet(referral, coverage_rmdup, coverage):
 
 
 	ws1['A5']=sampleId
@@ -701,6 +700,7 @@ def get_alignment_metrics_rmdup():
 def get_met_exon_skipping(referral_list):
 
 	ws8=wb.create_sheet("RMATS")
+	ws9=wb.create_sheet("Subpanel NTC Check")
 
 	ws8['A4']='Lab number'
 	ws8['B4']='Patient Name'
@@ -807,7 +807,6 @@ def get_met_exon_skipping(referral_list):
 	for gene in referral_list:
 		if (gene=="MET_exon14_skipping"):
 			rmats_MET=rmats_dataframe[rmats_dataframe["geneSymbol"]=='"MET"']
-			print(rmats_MET)
 			if (len(rmats_MET)>0):
 				for row in dataframe_to_rows(rmats_MET, header=False, index=False):
 					ws8.append(row)
@@ -940,59 +939,121 @@ def get_met_exon_skipping(referral_list):
 				ws6['B36']="EGFR v3-No fusions called"
 
 
-#transfer the coverage values for EGFRv3 and MET_exon14_skipping events breakpoints from the coverage report into the summary tab
-      
-	MET_exon_13=coverage_rmdup[coverage_rmdup["START"]==116411698]
-	del [MET_exon_13["META"], MET_exon_13["NTC_AVG_DEPTH"],MET_exon_13["%NTC contamination"]]
-		 
-	MET_exon_15=coverage_rmdup[coverage_rmdup["END"]==116414944]
-	del [MET_exon_15["META"],MET_exon_15["NTC_AVG_DEPTH"],MET_exon_15["%NTC contamination"]]
+	#Add the EGFR and MET hotspot coverage values with duplicates removed to the subpanel NTC check tab
+	ws9["A1"]="with duplicates"
+	ws9.column_dimensions['A'].width=30
+	MET_exon_13=coverage[coverage["START"]==116411698]
+	MET_exon_15=coverage[coverage["END"]==116414944]
+	EGFR_exon_1=coverage[coverage["START"]==55087048]
+	EGFR_exon_8=coverage[coverage["END"]==55223532]
 
-	EGFR_exon_1=coverage_rmdup[coverage_rmdup["START"]==55087048]
-	del [EGFR_exon_1["META"], EGFR_exon_1["NTC_AVG_DEPTH"],EGFR_exon_1["%NTC contamination"]]
+	del [MET_exon_13["CHR"], MET_exon_13["START"],MET_exon_13["END"]]
+	del [MET_exon_15["CHR"],MET_exon_15["START"],MET_exon_15["END"]]
+	del [EGFR_exon_1["CHR"], EGFR_exon_1["START"],EGFR_exon_1["END"]]
+	del [EGFR_exon_8["CHR"], EGFR_exon_8["START"], EGFR_exon_8["END"]]
 
-	EGFR_exon_8=coverage_rmdup[coverage_rmdup["END"]==55223532]
-	del [EGFR_exon_8["META"], EGFR_exon_8["NTC_AVG_DEPTH"], EGFR_exon_8["%NTC contamination"]]
+	for row in dataframe_to_rows(MET_exon_13, header=True, index=False):
+		ws9.append(row)
+	for row in dataframe_to_rows(MET_exon_15, header=False, index=False):
+		ws9.append(row)
+	for row in dataframe_to_rows(EGFR_exon_1, header=False, index=False):
+		ws9.append(row)
+	for row in dataframe_to_rows(EGFR_exon_8, header=False, index=False):
+		ws9.append(row)
 
 
-	#If the coverage over the MET_exon14_skipping and EGFRv3 breakpoints are greater than the thresholds, highlight them in red.
+	#colour the %NTC contamination tab if the contamination level is above 10%
+	colour= PatternFill("solid", start_color="00FF0000", end_color="00FF0000")
+	ws9.conditional_formatting.add('D3:D7', CellIsRule( operator='greaterThan', formula=['10'], stopIfTrue=True, fill=colour))
+	ws9.conditional_formatting.add('D10:D15', CellIsRule( operator='greaterThan', formula=['10'], stopIfTrue=True, fill=colour))
 
-	for row in dataframe_to_rows(MET_exon_13, header=False, index=False):
+
+	#Add the EGFR and MET hotspot coverage values without duplicates removed to the subpanel NTC check tab
+	ws9["A8"]="without duplicates"      
+	MET_exon_13_rmdup=coverage_rmdup[coverage_rmdup["START"]==116411698]
+	MET_exon_15_rmdup=coverage_rmdup[coverage_rmdup["END"]==116414944]
+	EGFR_exon_1_rmdup=coverage_rmdup[coverage_rmdup["START"]==55087048]
+	EGFR_exon_8_rmdup=coverage_rmdup[coverage_rmdup["END"]==55223532]
+
+	MET_exon_13_rmdup_ws9=MET_exon_13_rmdup.drop(["CHR", "START","END"], axis=1)
+	MET_exon_15_rmdup_ws9=MET_exon_15_rmdup.drop(["CHR", "START","END"], axis=1)
+	EGFR_exon_1_rmdup_ws9=EGFR_exon_1_rmdup.drop(["CHR", "START","END"], axis=1)
+	EGFR_exon_8_rmdup_ws9=EGFR_exon_8_rmdup.drop(["CHR", "START","END"], axis=1)
+
+
+	for row in dataframe_to_rows(MET_exon_13_rmdup_ws9, header=True, index=False):
+		ws9.append(row)
+	for row in dataframe_to_rows(MET_exon_15_rmdup_ws9, header=False, index=False):
+		ws9.append(row)
+	for row in dataframe_to_rows(EGFR_exon_1_rmdup_ws9, header=False, index=False):
+		ws9.append(row)
+	for row in dataframe_to_rows(EGFR_exon_8_rmdup_ws9, header=False, index=False):
+		ws9.append(row)
+
+
+	#Add and format the NTC checker boxes in the subpanel NTC tab
+	ws9['H7']="NTC check 1"
+	ws9['H8']="NTC check 2"
+	ws9['I6']="Results"
+	ws9['J6']="Comments"
+
+	border_a=Border(left=Side(border_style=BORDER_MEDIUM), right=Side(border_style=BORDER_MEDIUM), top=Side(border_style=BORDER_MEDIUM), bottom=Side(border_style=BORDER_MEDIUM))
+	position=['I6','J6','H7','I7','J7','H8', 'I8', 'J8']
+	for cell in position:
+		ws9[cell].border=border_a
+
+	colour= PatternFill("solid", fgColor="00CCFFFF")
+	position= ['I6','J6']
+	for cell in position:
+		ws9[cell].fill=colour
+
+	colour= PatternFill("solid", fgColor="DCDCDC")
+	position= ['H7','H8']
+	for cell in position:
+		ws9[cell].fill=colour
+
+
+	#Add the coverage values for EGFRv3 and MET_exon14_skipping events breakpoints into the summary tab and if the coverage is over the thresholds highlight in red
+	del [MET_exon_13_rmdup["META"], MET_exon_13_rmdup["NTC_AVG_DEPTH"],MET_exon_13_rmdup["%NTC contamination"]]
+	del [MET_exon_15_rmdup["META"],MET_exon_15_rmdup["NTC_AVG_DEPTH"],MET_exon_15_rmdup["%NTC contamination"]]
+	del [EGFR_exon_1_rmdup["META"], EGFR_exon_1_rmdup["NTC_AVG_DEPTH"],EGFR_exon_1_rmdup["%NTC contamination"]]
+	del [EGFR_exon_8_rmdup["META"], EGFR_exon_8_rmdup["NTC_AVG_DEPTH"], EGFR_exon_8_rmdup["%NTC contamination"]]
+
+
+	for row in dataframe_to_rows(MET_exon_13_rmdup, header=False, index=False):
 		ws5.append(row)
-	MET_exon_13_AVGdepth=MET_exon_13[["AVG_DEPTH"]]
-	if (MET_exon_13_AVGdepth.iloc[0,0]<7):
+	MET_exon_13_rmdup_AVGdepth=MET_exon_13_rmdup[["AVG_DEPTH"]]
+	if (MET_exon_13_rmdup_AVGdepth.iloc[0,0]<7):
 		colour= PatternFill("solid", fgColor="00FF0000")
 		position= ['D48']
 		for cell in position:
 			ws5[cell].fill=colour
 
 
-	for row in dataframe_to_rows(MET_exon_15, header=False, index=False):
+	for row in dataframe_to_rows(MET_exon_15_rmdup, header=False, index=False):
 		ws5.append(row)
-	MET_exon_15_AVGdepth=MET_exon_15[["AVG_DEPTH"]]
-	print(MET_exon_15_AVGdepth)
-	if (MET_exon_15_AVGdepth.iloc[0,0]<6):
+	MET_exon_15_rmdup_AVGdepth=MET_exon_15_rmdup[["AVG_DEPTH"]]
+	if (MET_exon_15_rmdup_AVGdepth.iloc[0,0]<6):
 		colour= PatternFill("solid", fgColor="00FF0000")
 		position= ['D49']
 		for cell in position:
 			ws5[cell].fill=colour
 
 
-	for row in dataframe_to_rows(EGFR_exon_1, header=False, index=False):
+	for row in dataframe_to_rows(EGFR_exon_1_rmdup, header=False, index=False):
 		ws5.append(row)
-	EGFR_exon_1_AVGdepth=EGFR_exon_1[["AVG_DEPTH"]]
-	if (EGFR_exon_1_AVGdepth.iloc[0,0]<6):
+	EGFR_exon_1_rmdup_AVGdepth=EGFR_exon_1_rmdup[["AVG_DEPTH"]]
+	if (EGFR_exon_1_rmdup_AVGdepth.iloc[0,0]<6):
 		colour= PatternFill("solid", fgColor="00FF0000")
 		position= ['D50']
 		for cell in position:
 			ws5[cell].fill=colour
 
 
-	for row in dataframe_to_rows(EGFR_exon_8, header=False, index=False):
+	for row in dataframe_to_rows(EGFR_exon_8_rmdup, header=False, index=False):
 		ws5.append(row)
-	EGFR_exon_8_AVGdepth=EGFR_exon_8[["AVG_DEPTH"]]
-	print(EGFR_exon_8_AVGdepth)
-	if (EGFR_exon_8_AVGdepth.iloc[0,0]<9):
+	EGFR_exon_8_rmdup_AVGdepth=EGFR_exon_8_rmdup[["AVG_DEPTH"]]
+	if (EGFR_exon_8_rmdup_AVGdepth.iloc[0,0]<9):
 		colour= PatternFill("solid", fgColor="00FF0000")
 		position= ['D51']
 		for cell in position:
@@ -1031,8 +1092,8 @@ if __name__ == "__main__":
 	ntc_total_average_depth, ntc_total_average_depth_rmdup=get_ntc_total_coverage()
 	get_total_coverage(ntc_total_average_depth, ntc_total_average_depth_rmdup)
 	ntc_average_depth, ntc_average_depth_rmdup=ntc_get_coverage()
-	coverage_rmdup=get_coverage(referral, ntc_average_depth, ntc_average_depth_rmdup)
-	format_analysis_sheet(referral, coverage_rmdup)
+	coverage_rmdup, coverage=get_coverage(referral, ntc_average_depth, ntc_average_depth_rmdup)
+	format_analysis_sheet(referral, coverage_rmdup, coverage)
 	get_alignment_metrics_rmdup()
 
 	if (("MET_exon14_skipping" in referral_list) or ("EGFRv3" in referral_list)):
