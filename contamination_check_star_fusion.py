@@ -169,9 +169,9 @@ for sample in sampleList:
                             if (len(report_referral_previous)>0):
                                 fusion_list_referral_previous1=report_referral_previous["Fusion_Name"].tolist()
 
-
+			
                                 #get a list of fusions with the genes the alternate way round for the sample before
-                                report_referral_previous["Fusion_Name"]=report_previous["Fusion_Name"].astype(str)
+                                report_referral_previous["Fusion_Name"]=report_referral_previous["Fusion_Name"].astype(str)
                                 report_referral_previous["gene1"]=report_referral_previous["Fusion_Name"].str.split('--', expand=True)[0]
                                 report_referral_previous["gene2"]=report_referral_previous["Fusion_Name"].str.split('--', expand=True)[1]
                                 report_referral_previous["Fusion_Name2"]=report_referral_previous["gene2"].str.cat(report_referral_previous["gene1"], sep="--")
@@ -230,7 +230,7 @@ for sample in sampleList:
 
     #calculate the level of contamination in the NTC. If the number of fusions for the panel genes is less 0, contamination is "No". Otherwise contamination is "Yes".
     elif (NTC_in_sample==True):
-        ntc_star_fusion_report=pandas.read_csv(sample+"/fusionReport/"+sample+"_fusionReport.txt")
+        ntc_star_fusion_report=pandas.read_csv(sample+"/fusionReport/"+sample+"_fusionReport.txt" ,sep="\t")
         if (len(ntc_star_fusion_report)>0):
             ntc_star_fusion_report=ntc_star_fusion_report[ntc_star_fusion_report["Fusion_Name"].str.contains("ALK|ROS1|RET|BRAF|NTRK1|NTRK2|NTRK3")]
             len_ntc_star_fusion_report=len(ntc_star_fusion_report)
