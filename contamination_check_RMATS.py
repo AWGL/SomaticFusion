@@ -191,7 +191,7 @@ for sample in sampleList:
 contamination_dataframe_panel=pandas.DataFrame(list(contamination_RMATS_dict.items()), columns=["Sample", "Contamination_RMATS"])
 contamination_dataframe_referral=pandas.DataFrame(list(contamination_referral_RMATS_dict.items()), columns=["Sample", "Contamination_referral_RMATS"])
 contamination_dataframe=pandas.merge(contamination_dataframe_panel, contamination_dataframe_referral, on="Sample")
-contamination_dataframe.to_csv('contamination_RMATS_TESTER.csv', index=False)
+contamination_dataframe.to_csv('contamination_RMATS.csv', index=False)
 
 
 
