@@ -116,10 +116,8 @@ for sample in sampleList:
         #compare the fusions within the sample to the fusions in sample before and after for the REFERRAL
         if (len_gene_list!=0):
             for gene in gene_list:
-		print(gene)
                 report_MET_EGFR = pandas.read_csv(sample+"/"+seqId+"_"+sample+"_RMATS_Report.tsv", sep="\t")
                 if (len(report_MET_EGFR)>0):
-                    print(report_MET_EGFR["geneSymbol"])
                     report_referral=report_MET_EGFR[report_MET_EGFR["geneSymbol"]==gene]
                     if (len(report_referral)>0):
 
