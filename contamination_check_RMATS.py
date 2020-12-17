@@ -40,7 +40,6 @@ for sample in sampleList:
        #get list of genes in the referral for the sample
         referral_equals, referral= referral_string.split("=")
         referral_file=pandas.read_csv("/data/diagnostics/pipelines/SomaticFusion/SomaticFusion-"+version+"/Referrals/"+referral+".txt", sep="\t")
-        referrral_file=referral_file[referral_file['Genes']==("MET_exon14_skipping", "EGFRv3")]
         gene_list=list(referral_file['Genes'])
 
         len_gene_list=len(gene_list)
@@ -50,7 +49,7 @@ for sample in sampleList:
             if (gene_list[gene_value]=="MET_exon14_skipping"):
                 gene_list[gene_value]="MET"
             elif (gene_list[gene_value]=="EGFRv3"):
-                gene_list[gene_value]=="EGFR"
+                gene_list[gene_value]="EGFR"
             gene_value=gene_value+1
    
 
@@ -179,7 +178,6 @@ for sample in sampleList:
     #calculate the level of contamination in the NTC. If the number of fusions for the panel genes is less 0, contamination is "No". Otherwise contamination is "Yes".
     elif (NTC_in_sample==True):
         ntc_RMATS_report=pandas.read_csv(sample+"/"+seqId+"_"+sample+"_RMATS_Report.tsv", sep="\t")
-        len_ntc_arriba_report=len(ntc_RMATS_report)
         if (len(ntc_RMATS_report>0)):
             contamination_referral_RMATS_dict[sample]="Yes"
 
