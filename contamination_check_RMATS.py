@@ -40,7 +40,6 @@ for sample in sampleList:
        #get list of genes in the referral for the sample
         referral_equals, referral= referral_string.split("=")
         referral_file=pandas.read_csv("/data/diagnostics/pipelines/SomaticFusion/SomaticFusion-"+version+"/Referrals/"+referral+".txt", sep="\t")
-        referrral_file=referral_file[referral_file['Genes']==("MET_exon14_skipping", "EGFRv3")]
         gene_list=list(referral_file['Genes'])
 
         len_gene_list=len(gene_list)
@@ -50,7 +49,7 @@ for sample in sampleList:
             if (gene_list[gene_value]=="MET_exon14_skipping"):
                 gene_list[gene_value]="MET"
             elif (gene_list[gene_value]=="EGFRv3"):
-                gene_list[gene_value]=="EGFR"
+                gene_list[gene_value]="EGFR"
             gene_value=gene_value+1
    
 
@@ -117,8 +116,10 @@ for sample in sampleList:
         #compare the fusions within the sample to the fusions in sample before and after for the REFERRAL
         if (len_gene_list!=0):
             for gene in gene_list:
+		print(gene)
                 report_MET_EGFR = pandas.read_csv(sample+"/"+seqId+"_"+sample+"_RMATS_Report.tsv", sep="\t")
                 if (len(report_MET_EGFR)>0):
+                    print(report_MET_EGFR["geneSymbol"])
                     report_referral=report_MET_EGFR[report_MET_EGFR["geneSymbol"]==gene]
                     if (len(report_referral)>0):
 
@@ -179,7 +180,6 @@ for sample in sampleList:
     #calculate the level of contamination in the NTC. If the number of fusions for the panel genes is less 0, contamination is "No". Otherwise contamination is "Yes".
     elif (NTC_in_sample==True):
         ntc_RMATS_report=pandas.read_csv(sample+"/"+seqId+"_"+sample+"_RMATS_Report.tsv", sep="\t")
-        len_ntc_arriba_report=len(ntc_RMATS_report)
         if (len(ntc_RMATS_report>0)):
             contamination_referral_RMATS_dict[sample]="Yes"
 
@@ -191,7 +191,7 @@ for sample in sampleList:
 contamination_dataframe_panel=pandas.DataFrame(list(contamination_RMATS_dict.items()), columns=["Sample", "Contamination_RMATS"])
 contamination_dataframe_referral=pandas.DataFrame(list(contamination_referral_RMATS_dict.items()), columns=["Sample", "Contamination_referral_RMATS"])
 contamination_dataframe=pandas.merge(contamination_dataframe_panel, contamination_dataframe_referral, on="Sample")
-contamination_dataframe.to_csv('contamination_RMATS.csv', index=False)
+contamination_dataframe.to_csv('contamination_RMATS_TESTER.csv', index=False)
 
 
 

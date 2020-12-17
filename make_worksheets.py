@@ -953,17 +953,26 @@ def get_met_exon_skipping(referral_list):
 		if (gene=="MET_exon14_skipping"):
 			rmats_MET=rmats_dataframe[rmats_dataframe["geneSymbol"]=='"MET"']
 			if (len(rmats_MET)>0):
-				for row in dataframe_to_rows(rmats_MET, header=False, index=False):
-					ws8.append(row)
+				print("MET_exon_14_skipping present")
 			else:
-				ws8['B10']="MET ex14 skipping-No fusions called"
+				dict_RMATS=({"GeneID":"", "geneSymbol": "MET_exon_14_skipping-no fusions found", "chr": "", "exonStart_0base": "", "exonEnd": "", "IJC_SAMPLE_1":"", "SJC_SAMPLE_1": "", "IJC_SAMPLE_2": "", "SJC_SAMPLE_2":"", "FDR": "", "IncLevel1": "", "IncLevel2": "", "IncLevelDifference": ""}) 
+				rmats_MET= pandas.DataFrame(dict_RMATS, columns=["GeneID", "geneSymbol", "chr", "exonStart_0base", "exonEnd", "IJC_SAMPLE_1", "SJC_SAMPLE_1", "IJC_SAMPLE_2","SJC_SAMPLE_2" "FDR", "IncLevel1", "IncLevel2", "IncLevelDifference"], index=[0]) 
+
+			for row in dataframe_to_rows(rmats_MET, header=False, index=False):
+				ws8.append(row)
+
+
 		if (gene=="EGFRv3"):
 			rmats_EGFR=rmats_dataframe[rmats_dataframe["geneSymbol"]=='"EGFR"']
 			if (len(rmats_EGFR)>0):
-				for row in dataframe_to_rows(rmats_EGFR, header=False, index=False):
-					ws8.append(row)
+				print("EGFRv3 present")
+			
 			else:
-				ws8['B11']="EGFR v3-No fusions called"
+				dict_RMATS=({"GeneID":"", "geneSymbol": "EGFRv3-no fusions found", "chr": "", "exonStart_0base": "", "exonEnd": "", "IJC_SAMPLE_1":"", "SJC_SAMPLE_1": "", "IJC_SAMPLE_2": "", "SJC_SAMPLE_2":"", "FDR": "", "IncLevel1": "", "IncLevel2": "", "IncLevelDifference": ""}) 
+				rmats_EGFR= pandas.DataFrame(dict_RMATS, columns=["GeneID", "geneSymbol", "chr", "exonStart_0base", "exonEnd", "IJC_SAMPLE_1", "SJC_SAMPLE_1", "IJC_SAMPLE_2","SJC_SAMPLE_2" "FDR", "IncLevel1", "IncLevel2", "IncLevelDifference"], index=[0]) 
+
+			for row in dataframe_to_rows(rmats_EGFR, header=False, index=False):
+				ws8.append(row)
 
 
 
@@ -1067,21 +1076,34 @@ def get_met_exon_skipping(referral_list):
 					rmats_ntc.append(rmats_ntc_line)
 	rmats_ntc_dataframe = pandas.DataFrame(rmats_ntc, columns=headers)
 	rmats_ntc_dataframe=rmats_ntc_dataframe[['GeneID', 'geneSymbol', 'chr', 'exonStart_0base', 'exonEnd', 'IJC_SAMPLE_1', 'SJC_SAMPLE_1', 'IJC_SAMPLE_2', 'SJC_SAMPLE_2', 'FDR', 'IncLevel1', 'IncLevel2', 'IncLevelDifference']]
+
+
+
 	for gene in referral_list:
 		if (gene=="MET_exon14_skipping"):
-			rmats_ntc_MET=rmats_ntc_dataframe[rmats_ntc_dataframe["geneSymbol"]=="MET"]
+			rmats_ntc_MET=rmats_ntc_dataframe[rmats_ntc_dataframe["geneSymbol"]=='"MET"']
 			if (len(rmats_ntc_MET)>0):
-				for row in dataframe_to_rows(rmats_ntc_MET, header=False, index=False):
-					ws8.append(row)
+				print("MET_exon_14_skipping present in ntc")
 			else:
-				ws6['B35']="MET ex14 skipping-No fusions called"
+				dict_RMATS_ntc=({"GeneID":"", "geneSymbol": "MET_exon_14_skipping-no fusions found", "chr": "", "exonStart_0base": "", "exonEnd": "", "IJC_SAMPLE_1":"", "SJC_SAMPLE_1": "", "IJC_SAMPLE_2": "", "SJC_SAMPLE_2":"", "FDR": "", "IncLevel1": "", "IncLevel2": "", "IncLevelDifference": ""}) 
+				rmats_ntc_MET= pandas.DataFrame(dict_RMATS_ntc, columns=["GeneID", "geneSymbol", "chr", "exonStart_0base", "exonEnd", "IJC_SAMPLE_1", "SJC_SAMPLE_1", "IJC_SAMPLE_2","SJC_SAMPLE_2" "FDR", "IncLevel1", "IncLevel2", "IncLevelDifference"], index=[0]) 
+
+			for row in dataframe_to_rows(rmats_ntc_MET, header=False, index=False):
+				ws6.append(row)
+
+
 		if (gene=="EGFRv3"):
-			rmats_ntc_EGFR=rmats_ntc_dataframe[rmats_ntc_dataframe["geneSymbol"]=="EGFR"]
+			rmats_ntc_EGFR=rmats_ntc_dataframe[rmats_ntc_dataframe["geneSymbol"]=='"EGFR"']
 			if (len(rmats_ntc_EGFR)>0):
-				for row in dataframe_to_rows(rmats_ntc_EGFR, header=False, index=False):
-					ws8.append(row)
+				print("EGFRv3 present in ntc")
+			
 			else:
-				ws6['B36']="EGFR v3-No fusions called"
+				dict_RMATS_ntc=({"GeneID":"", "geneSymbol": "EGFRv3-no fusions found", "chr": "", "exonStart_0base": "", "exonEnd": "", "IJC_SAMPLE_1":"", "SJC_SAMPLE_1": "", "IJC_SAMPLE_2": "", "SJC_SAMPLE_2":"", "FDR": "", "IncLevel1": "", "IncLevel2": "", "IncLevelDifference": ""}) 
+				rmats_ntc_EGFR= pandas.DataFrame(dict_RMATS_ntc, columns=["GeneID", "geneSymbol", "chr", "exonStart_0base", "exonEnd", "IJC_SAMPLE_1", "SJC_SAMPLE_1", "IJC_SAMPLE_2","SJC_SAMPLE_2" "FDR", "IncLevel1", "IncLevel2", "IncLevelDifference"], index=[0]) 
+
+			for row in dataframe_to_rows(rmats_ntc_EGFR, header=False, index=False):
+				ws6.append(row)
+
 
 
 
