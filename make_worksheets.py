@@ -11,78 +11,39 @@ from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.formatting.rule import CellIsRule
 from openpyxl.styles import Alignment
 
-wb=Workbook()
-ws7=wb.create_sheet("Patient_demographics")
-ws6= wb.create_sheet("NTC fusion report")
-ws9=wb.create_sheet("Subpanel_NTC_Check")
-ws1= wb.create_sheet("Gene_fusion_report")
-ws5=wb.create_sheet("Summary")
-ws3=wb.create_sheet("coverage_with_duplicates")
-ws4=wb.create_sheet("coverage_without_duplicates")
-ws2=wb.create_sheet("total_coverage")
-
-ws1["A4"]="Lab number"
-ws1["B4"]="Patient name"
-ws1["C4"]="Reason for referral"
-ws1["D4"]="NGS wks"
-ws1["E4"]="NextSeq runId"
-ws1["F4"]="Checker 1 initials and date"
-ws1["G4"]="Checker 2 initials and date"
-
-
-ws7['A1']='Date Received'
-ws7['B1']='LABNO'
-ws7['C1']='Patient name'
-ws7['D1']='DOB'
-ws7['E1']='Reason for referral'
-ws7['F1']='Referring Clinician'
-ws7['G1']='Indication'
-ws7['H1']='Due Date'
-ws7['I1']='% Tumour'
-ws7['J1']='DV200'
-ws7['K1']='Pre-processing (dil/zymo)'
-ws7['L1']='Qubit RNA conc after pre-processing'
-ws7['M1']='NGS Worksheet'
-ws7['N1']='NextSeq run ID'
-ws7['O1']='PostPCR1 Qubit'
-ws7['P1']='Result'
-ws7['Q1']='Date reported'
-ws7['R1']='Comments'
-
-ws7['A6']="Checker 1 initials and date"
-ws7['A7']="Checker 2 initals and date"
-
-ws5['H5'].number_format='mm-dd-yy'
 
 
 
-
-def get_referral_list(referral):
+def get_referral_list(referral, referrals_path, wb):
 	
 	#get the genes in the referral file for the sample
-	referral_file=pandas.read_csv("/data/diagnostics/pipelines/SomaticFusion/SomaticFusion-"+version+"/Referrals/"+referral+".txt", sep="\t")
+	referral_file=pandas.read_csv(referrals_path+"Referrals/"+referral+".txt", sep="\t")
 	referral_list=list(referral_file['Genes'])
-	return(referral_list)
+	return(referral_list, wb)
 
 
-
-
-
-def get_NTC_fusion_report(ntc):
+def get_NTC_fusion_report(ntc, referral_list, path,wb, ws6):
 	
 	#get the NTC star fusion results for all the genes in the samples referral type
 	ws6["A4"]="NTC STAR-Fusion results"
 	for referral in referral_list:
                 
 		if ((referral!= "MET_exon14_skipping") and (referral!="EGFRv3")):
-			if (os.stat("../"+ntc+"/Results/STAR_Fusion/"+ntc+"_fusion_report_"+referral+".txt").st_size!=0):
+			if (os.stat(path + ntc+"/Results/STAR_Fusion/"+ntc+"_fusion_report_"+referral+".txt").st_size!=0):
       	
-				NTC_star_fusion_report=pandas.read_csv("../"+ntc+"/Results/STAR_Fusion/"+ntc+"_fusion_report_"+referral+".txt", sep="\t")
+				NTC_star_fusion_report=pandas.read_csv(path +ntc+"/Results/STAR_Fusion/"+ntc+"_fusion_report_"+referral+".txt", sep="\t")
 	
 				NTC_star_fusion_report=pandas.DataFrame(NTC_star_fusion_report)
+
+				#if there are no fusions for the gene in the report append "<gene name>- no fusions found"
+				if (len(NTC_star_fusion_report)==0):
+					dict_NTC_star_fusion=({"Fusion_name": referral + "-no fusions found", "Split_Read_Count": "", "Spanning_Read_Count": "", "Left_Breakpoint": "", "Right_Breakpoint": "", "SpliceType": "", "LargeAnchorSupport": "", "FFPM": "", "LeftBreakEntropy": "", "RightBreakEntropy": "", "CDS_Left_ID": "", "CDS_Left_Range": "", "CDS_Right_ID": "", "CDS_Right_Range": "", "Prot_Fusion_Type": "", "Num_WT_Fragments_Left": "", "Num_WT_Fragments_Right": "", "Fusion_Allelic_Fraction": ""}) 
+					NTC_star_fusion_report= pandas.DataFrame(dict_NTC_star_fusion, columns=["Fusion_name", "Split_Read_Count", "Spanning_Read_Count", "Left_Breakpoint", "Right_Breakpoint", "SpliceType", "LargeAnchorSupport", "FFPM", "type", "LeftBreakEntropy", "RightBreakEntropy", "CDS_Left_ID", "CDS_Left_Range", "CDS_Right_ID", "CDS_Right_Range", "Prot_Fusion_Type", "Num_WT_Fragments_Left", "Num_WT_Fragments_Right", "Fusion_Allelic_Fraction"], index=[0]) 	
+
 	
-				for row in dataframe_to_rows(NTC_star_fusion_report, header=True, index=False):
+				for row in dataframe_to_rows(NTC_star_fusion_report, header=False, index=False):
 					ws6.append(row)
+
 			else:
 				print("NTC STAR-Fusion results cannot be found")
 
@@ -93,8 +54,8 @@ def get_NTC_fusion_report(ntc):
 
 		if ((referral!= "MET_exon14_skipping") and (referral!="EGFRv3")):
 	
-			if (os.stat("../"+ntc+"/Results/arriba/"+ntc+"_fusion_report_"+referral+"_arriba.txt").st_size!=0):    	
-				NTC_arriba_report=pandas.read_csv("../"+ntc+"/Results/arriba/"+ntc+"_fusion_report_"+referral+"_arriba.txt", sep="\t")
+			if (os.stat(path+ntc+"/Results/arriba/"+ntc+"_fusion_report_"+referral+"_arriba.txt").st_size!=0):    	
+				NTC_arriba_report=pandas.read_csv(path +ntc+"/Results/arriba/"+ntc+"_fusion_report_"+referral+"_arriba.txt", sep="\t")
 				#if there are no fusions for the gene in the report append "<gene name>- no fusions found"
 				if (len(NTC_arriba_report)==0):
 					dict_NTC_arriba=({"gene1": referral + "-no fusions found", "gene2": "", "strand1(gene/fusion)": "", "strand2(gene/fusion)": "", "breakpoint1": "", "breakpoint2": "", "site1": "", "site2": "", "type": "", "direction1": "", "direction2": "", "split_reads1": "", "split_reads2": "", "discordant_mates": "", "coverage1": "", "coverage2": "", "confidence": "", "closest_genomic_breakpoint1": "", "closest_genomic_breakpoint2": "", "filters": "", "fusion_transcript": "", "reading_frame" : "", "peptide_sequence": "", "read_identifiers": ""}) 
@@ -106,11 +67,12 @@ def get_NTC_fusion_report(ntc):
 			else:
 				print("NTC arriba file does not exist")
 
-	return(NTC_star_fusion_report, NTC_arriba_report)
+
+	return(NTC_star_fusion_report, NTC_arriba_report, wb, ws6)
 
 	
 
-def get_star_fusion_report(referral_list, ntc_star_fusion_report):
+def get_star_fusion_report(referral_list, ntc_star_fusion_report, sampleId, path, wb, ws1, ws5):
 	ws1["A9"]="STAR-Fusion results"
 
 	#create empty pandas dataframe and append the STAR-Fusion results for all the genes in the sample's referral type
@@ -122,9 +84,9 @@ def get_star_fusion_report(referral_list, ntc_star_fusion_report):
 		if ((referral!= "MET_exon14_skipping") and (referral!="EGFRv3")):
 
 
-			if (os.stat("./Results/STAR_Fusion/"+sampleId+"_fusion_report_"+referral+".txt").st_size!=0):
+			if (os.stat(path+sampleId+"/Results/STAR_Fusion/"+sampleId+"_fusion_report_"+referral+".txt").st_size!=0):
       
-				star_fusion_report=pandas.read_csv("Results/STAR_Fusion/"+sampleId+"_fusion_report_"+referral+".txt", sep="\t")	
+				star_fusion_report=pandas.read_csv(path+sampleId+"/Results/STAR_Fusion/"+sampleId+"_fusion_report_"+referral+".txt", sep="\t")	
 				if len(star_fusion_report!=0):
 					star_fusion_report=pandas.DataFrame(star_fusion_report)
 					del star_fusion_report['Unnamed: 0']
@@ -153,11 +115,13 @@ def get_star_fusion_report(referral_list, ntc_star_fusion_report):
 		position= ['A20']
 		for cell in position:
 			ws5[cell].fill=colour
-				
+		
+
+	return(star_fusion_report_final, wb, ws1, ws5)		
 		
 
 
-def get_arriba_fusion_report(referral_list):
+def get_arriba_fusion_report(referral_list, sampleId, path, wb, ws1,ws5):
 
 	ws1["A23"]="Arriba results"
 
@@ -170,8 +134,8 @@ def get_arriba_fusion_report(referral_list):
 
 		if ((referral!= "MET_exon14_skipping") and (referral!="EGFRv3")):
 
-			if (os.stat("./Results/arriba/"+sampleId+"_fusion_report_"+referral+"_arriba.txt").st_size!=0):     	
-				arriba_report=pandas.read_csv("Results/arriba/"+sampleId+"_fusion_report_"+referral+"_arriba.txt", sep="\t")
+			if (os.stat(path+ sampleId+"/Results/arriba/"+sampleId+"_fusion_report_"+referral+"_arriba.txt").st_size!=0):     	
+				arriba_report=pandas.read_csv(path+ sampleId+"/Results/arriba/"+sampleId+"_fusion_report_"+referral+"_arriba.txt", sep="\t")
 
 				if len(arriba_report!=0):
 					del arriba_report['Unnamed: 0']					
@@ -200,19 +164,21 @@ def get_arriba_fusion_report(referral_list):
 			ws5[cell].fill=colour
 				
 
+	return(arriba_report_final, wb, ws1, ws5)
 
-def get_ntc_total_coverage():
+
+def get_ntc_total_coverage(ntc ,path):
 
 	#get the ntc total coverage with and without duplicates 
 
-	if (os.stat("../"+ntc+"/"+ntc+"_coverage.totalCoverage").st_size!=0):
-		ntc_total_coverage=pandas.read_csv("../"+ntc+"/"+ntc+"_coverage.totalCoverage", sep="\t")
+	if (os.stat(path+ntc+"/"+ntc+"_coverage.totalCoverage").st_size!=0):
+		ntc_total_coverage=pandas.read_csv(path+ntc+"/"+ntc+"_coverage.totalCoverage", sep="\t")
 		ntc_total_average_depth=ntc_total_coverage["AVG_DEPTH"]
 	else:
 		print("NTC total coverage file does not exist")
 
-	if (os.stat("../"+ntc+"/"+ntc+"_rmdup_coverage.totalCoverage").st_size!=0):
-		ntc_total_coverage_rmdup=pandas.read_csv("../"+ntc+"/"+ntc+"_rmdup_coverage.totalCoverage", sep="\t")
+	if (os.stat(path+ntc+"/"+ntc+"_rmdup_coverage.totalCoverage").st_size!=0):
+		ntc_total_coverage_rmdup=pandas.read_csv(path+ntc+"/"+ntc+"_rmdup_coverage.totalCoverage", sep="\t")
 		ntc_total_average_depth_rmdup=ntc_total_coverage_rmdup["AVG_DEPTH"]
 	else:
 		print("NTC total coverage rmdup file does not exist")
@@ -220,12 +186,12 @@ def get_ntc_total_coverage():
 	return(ntc_total_average_depth, ntc_total_average_depth_rmdup)
 
 
-def get_total_coverage(ntc_total_average_depth, ntc_total_average_depth_rmdup):
+def get_total_coverage(ntc_total_average_depth, ntc_total_average_depth_rmdup, sampleId, path, wb,ws2):
 
 	#get the total coverage of the genes of interest with and without duplicates 
 	ws2["A2"]="with duplicates"
-	if (os.stat(sampleId+"_coverage.totalCoverage").st_size!=0):
-		total_coverage=pandas.read_csv(sampleId+"_coverage.totalCoverage", sep="\t")
+	if (os.stat(path+sampleId+"/"+sampleId+"_coverage.totalCoverage").st_size!=0):
+		total_coverage=pandas.read_csv(path+sampleId+"/"+sampleId+"_coverage.totalCoverage", sep="\t")
 		total_coverage["NTC_AVG_DEPTH"]=ntc_total_average_depth
 		total_coverage["%NTC contamination"]=((total_coverage["NTC_AVG_DEPTH"].div(total_coverage["AVG_DEPTH"]).fillna(0)))*100
 		del total_coverage["PERC_COVERAGE@100"]
@@ -234,9 +200,9 @@ def get_total_coverage(ntc_total_average_depth, ntc_total_average_depth_rmdup):
 	else:
 		print(" Total coverage file does not exist")
 
-	if (os.stat(sampleId+"_rmdup_coverage.totalCoverage").st_size!=0):
+	if (os.stat(path+sampleId+"/"+sampleId+"_rmdup_coverage.totalCoverage").st_size!=0):
 		ws2["A32"]="without duplicates"
-		total_coverage_rmdup=pandas.read_csv(sampleId+"_rmdup_coverage.totalCoverage", sep="\t")
+		total_coverage_rmdup=pandas.read_csv(path+sampleId+"/"+sampleId+"_rmdup_coverage.totalCoverage", sep="\t")
 		total_coverage_rmdup["NTC_AVG_DEPTH"]=ntc_total_average_depth_rmdup
 		total_coverage_rmdup["%NTC contamination"]=((total_coverage_rmdup["NTC_AVG_DEPTH"].div(total_coverage_rmdup["AVG_DEPTH"])).fillna(0))*100
 		del total_coverage_rmdup["PERC_COVERAGE@100"]
@@ -258,19 +224,21 @@ def get_total_coverage(ntc_total_average_depth, ntc_total_average_depth_rmdup):
 		print(" Total coverage file rmdup does not exist")
 	ws2.column_dimensions['A'].width=50
 
+	return (total_coverage, total_coverage_rmdup, ws2, wb)
 
-def ntc_get_coverage():
+
+def ntc_get_coverage(path, ntc):
 
 	#get the coverage of the regions of interest with and without duplicates in the ntc
-	if (os.stat("../"+ntc+"/"+ntc+"_coverage.coverage").st_size!=0):
-		ntc_coverage=pandas.read_csv("../"+ntc+"/"+ntc+"_coverage.coverage", sep="\t")
+	if (os.stat(path+ntc+"/"+ntc+"_coverage.coverage").st_size!=0):
+		ntc_coverage=pandas.read_csv(path+ntc+"/"+ntc+"_coverage.coverage", sep="\t")
 		ntc_average_depth=ntc_coverage["AVG_DEPTH"]
 		del ntc_coverage["PERC_COVERAGE@100"]
 	else:
 		print(" NTC coverage file does not exist")
 
-	if (os.stat("../"+ntc+"/"+ntc+"_rmdup_coverage.coverage").st_size!=0):
-		ntc_coverage_rmdup=pandas.read_csv("../"+ntc+"/"+ntc+"_rmdup_coverage.coverage", sep="\t")
+	if (os.stat(path+ntc+"/"+ntc+"_rmdup_coverage.coverage").st_size!=0):
+		ntc_coverage_rmdup=pandas.read_csv(path+ntc+"/"+ntc+"_rmdup_coverage.coverage", sep="\t")
 		ntc_average_depth_rmdup=ntc_coverage_rmdup["AVG_DEPTH"]
 		del ntc_coverage_rmdup["PERC_COVERAGE@100"]
 	else:
@@ -279,11 +247,11 @@ def ntc_get_coverage():
 	return(ntc_average_depth, ntc_average_depth_rmdup)
 
 
-def get_coverage(referral, ntc_average_depth, ntc_average_depth_rmdup):
+def get_coverage(referral, ntc_average_depth, ntc_average_depth_rmdup, sampleId, path, wb, ws3, ws4):
 
 	#get the coverage of the regions of interest with and without duplicates in the sample
-	if (os.stat(sampleId+"_coverage.coverage").st_size!=0):
-		coverage=pandas.read_csv(sampleId+"_coverage.coverage", sep="\t")
+	if (os.stat(path+sampleId+"/"+sampleId+"_coverage.coverage").st_size!=0):
+		coverage=pandas.read_csv(path+sampleId+"/"+sampleId+"_coverage.coverage", sep="\t")
 		coverage["NTC_AVG_DEPTH"]=ntc_average_depth
 		coverage["%NTC contamination"]=((coverage["NTC_AVG_DEPTH"].div(coverage["AVG_DEPTH"])).fillna(0))*100
 		del coverage["PERC_COVERAGE@100"]
@@ -297,8 +265,8 @@ def get_coverage(referral, ntc_average_depth, ntc_average_depth_rmdup):
 		print("Coverage file does not exist")
 
 
-	if (os.stat(sampleId+"_rmdup_coverage.coverage").st_size!=0):
-		coverage_rmdup=pandas.read_csv(sampleId+"_rmdup_coverage.coverage", sep="\t")
+	if (os.stat(path+sampleId+"/"+sampleId+"_rmdup_coverage.coverage").st_size!=0):
+		coverage_rmdup=pandas.read_csv(path+sampleId+"/"+sampleId+"_rmdup_coverage.coverage", sep="\t")
 		coverage_rmdup["NTC_AVG_DEPTH"]=ntc_average_depth_rmdup
 		coverage_rmdup["%NTC contamination"]=((coverage_rmdup["NTC_AVG_DEPTH"].div(coverage_rmdup["AVG_DEPTH"])).fillna(0))*100
 		del coverage_rmdup["PERC_COVERAGE@100"]
@@ -319,11 +287,12 @@ def get_coverage(referral, ntc_average_depth, ntc_average_depth_rmdup):
 	ws3.column_dimensions['D'].width=110
 	ws4.column_dimensions['D'].width=110
 
-	return(coverage_rmdup, coverage)
+
+	return(coverage_rmdup, coverage, ws3, ws4, wb)
 
 
 
-def format_analysis_sheet(referral, coverage_rmdup, coverage):
+def format_analysis_sheet(referral, wb,ws1, ws2, ws3,ws4,ws5,ws6,ws7,ws9):
 
 
 	ws1['A5']=sampleId
@@ -658,11 +627,13 @@ def format_analysis_sheet(referral, coverage_rmdup, coverage):
 		for cell in row:
 			cell.alignment=Alignment(horizontal='left', vertical='center')
 
+	return (wb, ws1, ws2, ws3, ws4,ws5,ws6,ws7,ws9)
 
-def get_alignment_metrics_rmdup():
+
+def get_alignment_metrics_rmdup(path,sampleId, wb, ws5):
 
 	#get the percentage aligned reads rmdup and number of aligned reads rmdup
-	with open ("../"+sampleId+"_AlignmentSummaryMetrics_rmdup.txt") as file_rmdup:
+	with open (path+sampleId+"_AlignmentSummaryMetrics_rmdup.txt") as file_rmdup:
 		for line in file_rmdup:
 			if line.startswith("CATEGORY"):
 				headers_rmdup=line.split('\t')
@@ -687,12 +658,12 @@ def get_alignment_metrics_rmdup():
 		for cell in position:
 			ws5[cell].fill=colour
 
-	return aligned_reads_value_rmdup
+	return (aligned_reads_value_rmdup, percentage_aligned_reads_rmdup, wb, ws5)
 		 
 
 
 
-def get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup):
+def get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, sampleId, ntc, referral_list, coverage_rmdup, wb, ws9):
 
 	ws9["A2"]="with duplicates"
 	ws9.column_dimensions['A'].width=40
@@ -703,7 +674,7 @@ def get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup):
 	ws9["A4"]="Total mapped reads(including duplicates)"
 
 	#get the number of aligned reads with duplicates in the sample
-	with open ("../"+sampleId+"_AlignmentSummaryMetrics.txt") as file:
+	with open (path+sampleId+"_AlignmentSummaryMetrics.txt") as file:
 		for line in file:
 			if line.startswith("CATEGORY"):
 				headers=line.split('\t')
@@ -719,7 +690,7 @@ def get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup):
 
 
 	#get the number of aligned reads with duplicates in the ntc and calculate %NTC contamination
-	with open ("../"+ntc+"_AlignmentSummaryMetrics.txt") as file:
+	with open (path+ntc+"_AlignmentSummaryMetrics.txt") as file:
 		for line in file:
 			if line.startswith("CATEGORY"):
 				headers=line.split('\t')
@@ -739,24 +710,29 @@ def get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup):
 	if (("MET_exon14_skipping" in referral_list) or ("EGFRv3" in referral_list)):
 
 
-		MET_exon_13=coverage[coverage["START"]==116411698]
-		MET_exon_15=coverage[coverage["END"]==116414944]
-		EGFR_exon_1=coverage[coverage["START"]==55087048]
-		EGFR_exon_8=coverage[coverage["END"]==55223532]
+		if ("MET_exon14_skipping" in referral_list):
+			MET_exon_13=coverage[coverage["START"]==116411698]
+			MET_exon_15=coverage[coverage["END"]==116414944]
+			del [MET_exon_13["CHR"], MET_exon_13["START"],MET_exon_13["END"]]
+			del [MET_exon_15["CHR"],MET_exon_15["START"],MET_exon_15["END"]]
 
-		del [MET_exon_13["CHR"], MET_exon_13["START"],MET_exon_13["END"]]
-		del [MET_exon_15["CHR"],MET_exon_15["START"],MET_exon_15["END"]]
-		del [EGFR_exon_1["CHR"], EGFR_exon_1["START"],EGFR_exon_1["END"]]
-		del [EGFR_exon_8["CHR"], EGFR_exon_8["START"], EGFR_exon_8["END"]]
-	
-		for row in dataframe_to_rows(MET_exon_13, header=False, index=False):
-			ws9.append(row)
-		for row in dataframe_to_rows(MET_exon_15, header=False, index=False):
-			ws9.append(row)
-		for row in dataframe_to_rows(EGFR_exon_1, header=False, index=False):
-			ws9.append(row)
-		for row in dataframe_to_rows(EGFR_exon_8, header=False, index=False):
-			ws9.append(row)
+			for row in dataframe_to_rows(MET_exon_13, header=False, index=False):
+				ws9.append(row)
+			for row in dataframe_to_rows(MET_exon_15, header=False, index=False):
+				ws9.append(row)
+
+
+		if ("EGFRv3" in referral_list):
+			EGFR_exon_1=coverage[coverage["START"]==55087048]
+			EGFR_exon_8=coverage[coverage["END"]==55223532]
+
+			del [EGFR_exon_1["CHR"], EGFR_exon_1["START"],EGFR_exon_1["END"]]
+			del [EGFR_exon_8["CHR"], EGFR_exon_8["START"], EGFR_exon_8["END"]]
+
+			for row in dataframe_to_rows(EGFR_exon_1, header=False, index=False):
+				ws9.append(row)
+			for row in dataframe_to_rows(EGFR_exon_8, header=False, index=False):
+				ws9.append(row)
 
 
 
@@ -771,7 +747,7 @@ def get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup):
 
 
 	#get the number of aligned reads without duplicates in the ntc and calculate the %ntc contamination
-	with open ("../"+ntc+"_AlignmentSummaryMetrics_rmdup.txt") as file_rmdup:
+	with open (path+ntc+"_AlignmentSummaryMetrics_rmdup.txt") as file_rmdup:
 		for line in file_rmdup:
 			if line.startswith("CATEGORY"):
 				headers_rmdup=line.split('\t')
@@ -790,24 +766,32 @@ def get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup):
 	#Add the EGFR and MET hotspot coverage values without duplicates removed to the subpanel NTC check tab
 	if (("MET_exon14_skipping" in referral_list) or ("EGFRv3" in referral_list)):
 
-		MET_exon_13_rmdup=coverage_rmdup[coverage_rmdup["START"]==116411698]
-		MET_exon_15_rmdup=coverage_rmdup[coverage_rmdup["END"]==116414944]
-		EGFR_exon_1_rmdup=coverage_rmdup[coverage_rmdup["START"]==55087048]
-		EGFR_exon_8_rmdup=coverage_rmdup[coverage_rmdup["END"]==55223532]
 
-		MET_exon_13_rmdup_ws9=MET_exon_13_rmdup.drop(["CHR", "START","END"], axis=1)
-		MET_exon_15_rmdup_ws9=MET_exon_15_rmdup.drop(["CHR", "START","END"], axis=1)
-		EGFR_exon_1_rmdup_ws9=EGFR_exon_1_rmdup.drop(["CHR", "START","END"], axis=1)
-		EGFR_exon_8_rmdup_ws9=EGFR_exon_8_rmdup.drop(["CHR", "START","END"], axis=1)
+		if ("MET_exon14_skipping" in referral_list):
 
-		for row in dataframe_to_rows(MET_exon_13_rmdup_ws9, header=False, index=False):
-			ws9.append(row)
-		for row in dataframe_to_rows(MET_exon_15_rmdup_ws9, header=False, index=False):
-			ws9.append(row)
-		for row in dataframe_to_rows(EGFR_exon_1_rmdup_ws9, header=False, index=False):
-			ws9.append(row)
-		for row in dataframe_to_rows(EGFR_exon_8_rmdup_ws9, header=False, index=False):
-			ws9.append(row)
+			MET_exon_13_rmdup=coverage_rmdup[coverage_rmdup["START"]==116411698]
+			MET_exon_15_rmdup=coverage_rmdup[coverage_rmdup["END"]==116414944]
+			MET_exon_13_rmdup_ws9=MET_exon_13_rmdup.drop(["CHR", "START","END"], axis=1)
+			MET_exon_15_rmdup_ws9=MET_exon_15_rmdup.drop(["CHR", "START","END"], axis=1)
+
+			for row in dataframe_to_rows(MET_exon_13_rmdup_ws9, header=False, index=False):
+				ws9.append(row)
+			for row in dataframe_to_rows(MET_exon_15_rmdup_ws9, header=False, index=False):
+				ws9.append(row)
+
+
+		if  ("EGFRv3" in referral_list):
+
+			EGFR_exon_1_rmdup=coverage_rmdup[coverage_rmdup["START"]==55087048]
+			EGFR_exon_8_rmdup=coverage_rmdup[coverage_rmdup["END"]==55223532]
+			EGFR_exon_1_rmdup_ws9=EGFR_exon_1_rmdup.drop(["CHR", "START","END"], axis=1)
+			EGFR_exon_8_rmdup_ws9=EGFR_exon_8_rmdup.drop(["CHR", "START","END"], axis=1)
+
+
+			for row in dataframe_to_rows(EGFR_exon_1_rmdup_ws9, header=False, index=False):
+				ws9.append(row)
+			for row in dataframe_to_rows(EGFR_exon_8_rmdup_ws9, header=False, index=False):
+				ws9.append(row)
 
 
 	#Add and format the NTC checker boxes in the subpanel NTC tab
@@ -843,7 +827,11 @@ def get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup):
 	ws9.conditional_formatting.add('D4:D9', CellIsRule( operator='greaterThan', formula=['10'], stopIfTrue=True, fill=colour))
 	ws9.conditional_formatting.add('D15:D21', CellIsRule( operator='greaterThan', formula=['10'], stopIfTrue=True, fill=colour))
 
-def get_met_exon_skipping(referral_list):
+
+	return(aligned_reads_value, ws9, wb)
+
+
+def get_met_exon_skipping(referral_list, sampleId, referral, worksheetId, seqId, path,ntc, coverage_rmdup, wb, ws5, ws6):
 
 	ws8=wb.create_sheet("RMATS")
 
@@ -932,7 +920,7 @@ def get_met_exon_skipping(referral_list):
 	headers=[]
 	line_number=0
 
-	with open (seqId+"_"+sampleId+"_RMATS_Report.tsv") as file:
+	with open (path+sampleId+"/"+seqId+"_"+sampleId+"_RMATS_Report.tsv") as file:
 		for line in file:
 			if line.startswith("#"):
 				continue
@@ -945,7 +933,6 @@ def get_met_exon_skipping(referral_list):
 					rmats.append(rmats_line)
 	rmats_dataframe = pandas.DataFrame(rmats, columns=headers)
 	rmats_dataframe=rmats_dataframe[['GeneID', 'geneSymbol', 'chr', 'exonStart_0base', 'exonEnd', 'IJC_SAMPLE_1', 'SJC_SAMPLE_1', 'IJC_SAMPLE_2', 'SJC_SAMPLE_2', 'FDR', 'IncLevel1', 'IncLevel2', 'IncLevelDifference']]
-
 
 
 
@@ -973,7 +960,6 @@ def get_met_exon_skipping(referral_list):
 
 			for row in dataframe_to_rows(rmats_EGFR, header=False, index=False):
 				ws8.append(row)
-
 
 
 
@@ -1056,14 +1042,12 @@ def get_met_exon_skipping(referral_list):
 	ws6["O34"]="Conclusion checker 2"
 	ws6["P34"]="Comments"
 
-
-
 	#add the rmats ntc report to the ntc report tab. Only add exon skipping events for genes that are in the referral type.
 	rmats_ntc=[]
 	headers=[]
 	line_number=0
 
-	with open ("../"+ntc+"/"+seqId+"_"+ntc+"_RMATS_Report.tsv") as file:
+	with open (path+ntc+"/"+seqId+"_"+ntc+"_RMATS_Report.tsv") as file:
 		for line in file:
 			if line.startswith("#"):
 				continue
@@ -1076,8 +1060,6 @@ def get_met_exon_skipping(referral_list):
 					rmats_ntc.append(rmats_ntc_line)
 	rmats_ntc_dataframe = pandas.DataFrame(rmats_ntc, columns=headers)
 	rmats_ntc_dataframe=rmats_ntc_dataframe[['GeneID', 'geneSymbol', 'chr', 'exonStart_0base', 'exonEnd', 'IJC_SAMPLE_1', 'SJC_SAMPLE_1', 'IJC_SAMPLE_2', 'SJC_SAMPLE_2', 'FDR', 'IncLevel1', 'IncLevel2', 'IncLevelDifference']]
-
-
 
 	for gene in referral_list:
 		if (gene=="MET_exon14_skipping"):
@@ -1103,7 +1085,6 @@ def get_met_exon_skipping(referral_list):
 
 			for row in dataframe_to_rows(rmats_ntc_EGFR, header=False, index=False):
 				ws6.append(row)
-
 
 
 
@@ -1171,7 +1152,7 @@ def get_met_exon_skipping(referral_list):
 			cell.alignment=Alignment(wrap_text=True, horizontal='left', vertical='center')
 
 
-		
+	return (ws5, ws8, wb, ws6)
 
 
 if __name__ == "__main__":
@@ -1184,18 +1165,68 @@ if __name__ == "__main__":
 	version=sys.argv[6]
 
 
-	referral_list=get_referral_list(referral)
-	ntc_star_fusion_report, ntc_arriba_report=get_NTC_fusion_report(ntc)
-	get_star_fusion_report(referral_list, ntc_star_fusion_report)
-	get_arriba_fusion_report(referral_list)
-	ntc_total_average_depth, ntc_total_average_depth_rmdup=get_ntc_total_coverage()
-	get_total_coverage(ntc_total_average_depth, ntc_total_average_depth_rmdup)
-	ntc_average_depth, ntc_average_depth_rmdup=ntc_get_coverage()
-	coverage_rmdup, coverage=get_coverage(referral, ntc_average_depth, ntc_average_depth_rmdup)
-	format_analysis_sheet(referral, coverage_rmdup, coverage)
-	aligned_reads_value_rmdup=get_alignment_metrics_rmdup()
-	get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup)
+
+	path="/data/results/"+seqId + "/RocheSTFusion/"
+
+	referrals_path="/data/diagnostics/pipelines/SomaticFusion/SomaticFusion-"+version+"/"
+
+
+
+	wb=Workbook()
+	ws7=wb.create_sheet("Patient_demographics")
+	ws6= wb.create_sheet("NTC fusion report")
+	ws9=wb.create_sheet("Subpanel_NTC_Check")
+	ws1= wb.create_sheet("Gene_fusion_report")
+	ws5=wb.create_sheet("Summary")
+	ws3=wb.create_sheet("coverage_with_duplicates")
+	ws4=wb.create_sheet("coverage_without_duplicates")
+	ws2=wb.create_sheet("total_coverage")
+
+	ws1["A4"]="Lab number"
+	ws1["B4"]="Patient name"
+	ws1["C4"]="Reason for referral"
+	ws1["D4"]="NGS wks"
+	ws1["E4"]="NextSeq runId"
+	ws1["F4"]="Checker 1 initials and date"
+	ws1["G4"]="Checker 2 initials and date"
+
+
+	ws7['A1']='Date Received'
+	ws7['B1']='LABNO'
+	ws7['C1']='Patient name'
+	ws7['D1']='DOB'
+	ws7['E1']='Reason for referral'
+	ws7['F1']='Referring Clinician'
+	ws7['G1']='Indication'
+	ws7['H1']='Due Date'
+	ws7['I1']='% Tumour'
+	ws7['J1']='DV200'
+	ws7['K1']='Pre-processing (dil/zymo)'
+	ws7['L1']='Qubit RNA conc after pre-processing'
+	ws7['M1']='NGS Worksheet'
+	ws7['N1']='NextSeq run ID'
+	ws7['O1']='PostPCR1 Qubit'
+	ws7['P1']='Result'
+	ws7['Q1']='Date reported'
+	ws7['R1']='Comments'
+
+	ws7['A6']="Checker 1 initials and date"
+	ws7['A7']="Checker 2 initals and date"
+
+	ws5['H5'].number_format='mm-dd-yy'
+
+	referral_list, wb=get_referral_list(referral, referrals_path, wb)
+	ntc_star_fusion_report, ntc_arriba_report,wb, ws6=get_NTC_fusion_report(ntc, referral_list, path, wb, ws6)
+	star_fusion_report_final,wb,ws1,ws5=get_star_fusion_report(referral_list, ntc_star_fusion_report, sampleId, path,wb, ws1,ws5)
+	arriba_report,wb, ws1, ws5=get_arriba_fusion_report(referral_list, sampleId, path,wb, ws1, ws5)
+	ntc_total_average_depth, ntc_total_average_depth_rmdup=get_ntc_total_coverage(ntc,path)
+	total_coverage, total_coverage_rmdup, ws2,wb=get_total_coverage(ntc_total_average_depth, ntc_total_average_depth_rmdup,sampleId, path,wb, ws2)
+	ntc_average_depth, ntc_average_depth_rmdup=ntc_get_coverage(path,ntc)
+	coverage_rmdup, coverage, ws3, ws4, wb=get_coverage(referral, ntc_average_depth, ntc_average_depth_rmdup, sampleId,path, wb, ws3, ws4)
+	wb, ws1, ws2, ws3,ws4,ws5,ws6,ws7, ws9=format_analysis_sheet(referral, wb, ws1, ws2, ws3,ws4, ws5, ws6, ws7,ws9)
+	aligned_reads_value_rmdup, percentage_aligned_reads_rmdup,wb, ws5=get_alignment_metrics_rmdup(path,sampleId,wb,ws5)
+	aligned_reads_value, ws9,wb=get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, sampleId,ntc, referral_list,coverage_rmdup,wb,ws9)
 
 	if (("MET_exon14_skipping" in referral_list) or ("EGFRv3" in referral_list)):
-		get_met_exon_skipping(referral_list)
+		ws5, ws8, wb,ws6=get_met_exon_skipping(referral_list, sampleId, referral, worksheetId, seqId, path, ntc, coverage_rmdup,wb, ws5, ws6)
 	wb.save("../"+sampleId+"_"+referral +".xlsx")
