@@ -13,7 +13,7 @@ cd $PBS_O_WORKDIR
 # Usage: qsub run_star-fusion.sh [inside sample dir with .variables and \
 # .fastq.gz files]
 
-version="1.0.6"
+version="1.0.7"
 
 # source variables file
 . *.variables
