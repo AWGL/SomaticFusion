@@ -1088,6 +1088,8 @@ def get_met_exon_skipping(referral_list, sampleId, referral, worksheetId, seqId,
 
 
 
+
+
 	#Add the coverage values for EGFRv3 and MET_exon14_skipping events breakpoints into the summary tab and if the coverage is over the thresholds highlight in red
 	MET_exon_13_rmdup=coverage_rmdup[coverage_rmdup["START"]==116411698]
 	MET_exon_15_rmdup=coverage_rmdup[coverage_rmdup["END"]==116414944]
@@ -1100,54 +1102,62 @@ def get_met_exon_skipping(referral_list, sampleId, referral, worksheetId, seqId,
 	del [EGFR_exon_8_rmdup["META"], EGFR_exon_8_rmdup["NTC_AVG_DEPTH"], EGFR_exon_8_rmdup["%NTC contamination"]]
 
 
-	for row in dataframe_to_rows(MET_exon_13_rmdup, header=False, index=False):
-		ws5.append(row)
-	MET_exon_13_rmdup_AVGdepth=MET_exon_13_rmdup[["AVG_DEPTH"]]
-	if (MET_exon_13_rmdup_AVGdepth.iloc[0,0]<7):
-		colour= PatternFill("solid", fgColor="00FF0000")
-		position= ['D48']
-		for cell in position:
-			ws5[cell].fill=colour
+	#only add coverage values if "MET_exon14_skipping" is in the referral list
+	if ("MET_exon14_skipping" in referral_list):
+		ws5["A48"]="MET coverage results" 
+		for row in dataframe_to_rows(MET_exon_13_rmdup, header=False, index=False):
+			ws5.append(row)
+		MET_exon_13_rmdup_AVGdepth=MET_exon_13_rmdup[["AVG_DEPTH"]]
+		if (MET_exon_13_rmdup_AVGdepth.iloc[0,0]<7):
+			colour= PatternFill("solid", fgColor="00FF0000")
+			position= ['D49']
+			for cell in position:
+				ws5[cell].fill=colour
 
 
-	for row in dataframe_to_rows(MET_exon_15_rmdup, header=False, index=False):
-		ws5.append(row)
-	MET_exon_15_rmdup_AVGdepth=MET_exon_15_rmdup[["AVG_DEPTH"]]
-	if (MET_exon_15_rmdup_AVGdepth.iloc[0,0]<6):
-		colour= PatternFill("solid", fgColor="00FF0000")
-		position= ['D49']
-		for cell in position:
-			ws5[cell].fill=colour
+		for row in dataframe_to_rows(MET_exon_15_rmdup, header=False, index=False):
+			ws5.append(row)
+		MET_exon_15_rmdup_AVGdepth=MET_exon_15_rmdup[["AVG_DEPTH"]]
+		if (MET_exon_15_rmdup_AVGdepth.iloc[0,0]<6):
+			colour= PatternFill("solid", fgColor="00FF0000")
+			position= ['D50']
+			for cell in position:
+				ws5[cell].fill=colour
+
+		ws5["E49"]="MET_Exon13_last10bases"
+		ws5["E50"]="MET_Exon15_first10bases"
 
 
-	for row in dataframe_to_rows(EGFR_exon_1_rmdup, header=False, index=False):
-		ws5.append(row)
-	EGFR_exon_1_rmdup_AVGdepth=EGFR_exon_1_rmdup[["AVG_DEPTH"]]
-	if (EGFR_exon_1_rmdup_AVGdepth.iloc[0,0]<6):
-		colour= PatternFill("solid", fgColor="00FF0000")
-		position= ['D50']
-		for cell in position:
-			ws5[cell].fill=colour
+	#only add coverage values if "EGFRv3" is in the referral list
+	if ("EGFRv3" in referral_list):
+		ws5["A51"]="EGFR coverage results"
+		for row in dataframe_to_rows(EGFR_exon_1_rmdup, header=False, index=False):
+			ws5.append(row)
+		EGFR_exon_1_rmdup_AVGdepth=EGFR_exon_1_rmdup[["AVG_DEPTH"]]
+		if (EGFR_exon_1_rmdup_AVGdepth.iloc[0,0]<6):
+			colour= PatternFill("solid", fgColor="00FF0000")
+			position= ['D52']
+			for cell in position:
+				ws5[cell].fill=colour
 
 
-	for row in dataframe_to_rows(EGFR_exon_8_rmdup, header=False, index=False):
-		ws5.append(row)
-	EGFR_exon_8_rmdup_AVGdepth=EGFR_exon_8_rmdup[["AVG_DEPTH"]]
-	if (EGFR_exon_8_rmdup_AVGdepth.iloc[0,0]<9):
-		colour= PatternFill("solid", fgColor="00FF0000")
-		position= ['D51']
-		for cell in position:
-			ws5[cell].fill=colour
+		for row in dataframe_to_rows(EGFR_exon_8_rmdup, header=False, index=False):
+			ws5.append(row)
+		EGFR_exon_8_rmdup_AVGdepth=EGFR_exon_8_rmdup[["AVG_DEPTH"]]
+		if (EGFR_exon_8_rmdup_AVGdepth.iloc[0,0]<9):
+			colour= PatternFill("solid", fgColor="00FF0000")
+			position= ['D53']
+			for cell in position:
+				ws5[cell].fill=colour
+
+		ws5["E52"]="EGFR_Exon1_last10bases"
+		ws5["E53"]="EGFR_Exon8_first10bases"
 
 
-	ws5["E48"]="MET_Exon13_last10bases"
-	ws5["E49"]="MET_Exon15_first10bases"
-	ws5["E50"]="EGFR_Exon1_last10bases"
-	ws5["E51"]="EGFR_Exon8_first10bases"
-
+	
 	#format the RMATS part of the summary spreadsheet by wrapping text, middle aligning and aligning left
 
-	for row in ws5.iter_rows(min_row=47, max_row=51):
+	for row in ws5.iter_rows(min_row=47, max_row=55):
 		for cell in row:
 			cell.alignment=Alignment(wrap_text=True, horizontal='left', vertical='center')
 
