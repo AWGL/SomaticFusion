@@ -970,21 +970,19 @@ class test_make_worksheets(unittest.TestCase):
 		ws4_Colorectal3=wb_Colorectal3.create_sheet("coverage_without_duplicates")
 		ws2_Colorectal3=wb_Colorectal3.create_sheet("total_coverage")	
 
-		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_Colorectal, coverage_rmdup,wb_Colorectal3, ws9_Colorectal3)[1])
+		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_Colorectal, coverage_rmdup,wb_Colorectal3, ws9_Colorectal3)[0])
 
-		self.assertEqual(ws9["B4"].value,1122)
-		self.assertEqual(ws9["C4"].value,97)
-		self.assertEqual(ws9["D4"].value,8.645276292335117)
-
-		self.assertEqual(ws9["B5"].value,None)
-		self.assertEqual(ws9["C5"].value,None)
 
 		self.assertEqual(ws9["B15"].value,133)
 		self.assertEqual(ws9["C15"].value,4)
-		self.assertEqual(ws9["D15"].value,3.007518796992481 )
+		self.assertEqual(ws9["D15"].value,3.007518796992481)
 
-		self.assertEqual(ws9["B16"].value,None)
-		self.assertEqual(ws9["C16"].value,None)
+
+		self.assertEqual(ws9["A24"].value,None)
+		self.assertEqual(ws9["B24"].value,None)
+		self.assertEqual(ws9["C24"].value,None)
+		self.assertEqual(ws9["D24"].value,None)
+
 
 		#GIST
 		wb_GIST3=Workbook()
@@ -997,21 +995,20 @@ class test_make_worksheets(unittest.TestCase):
 		ws4_GIST3=wb_GIST3.create_sheet("coverage_without_duplicates")
 		ws2_GIST3=wb_GIST3.create_sheet("total_coverage")	
 
-		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_GIST, coverage_rmdup,wb_GIST3, ws9_GIST3)[1])
-
-		self.assertEqual(ws9["B4"].value,1122)
-		self.assertEqual(ws9["C4"].value,97)
-		self.assertEqual(ws9["D4"].value,8.645276292335117)
-
-		self.assertEqual(ws9["B5"].value,None)
-		self.assertEqual(ws9["C5"].value,None)
+		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_GIST, coverage_rmdup,wb_GIST3, ws9_GIST3)[0])
 
 		self.assertEqual(ws9["B15"].value,133)
 		self.assertEqual(ws9["C15"].value,4)
-		self.assertEqual(ws9["D15"].value,3.007518796992481 )
+		self.assertEqual(ws9["D15"].value,3.007518796992481)
 
-		self.assertEqual(ws9["B16"].value,None)
-		self.assertEqual(ws9["C16"].value,None)
+
+		self.assertEqual(ws9["A24"].value,None)
+		self.assertEqual(ws9["B24"].value,None)
+		self.assertEqual(ws9["C24"].value,None)
+		self.assertEqual(ws9["D24"].value,None)
+
+
+
 
 		#Glioma
 		wb_Glioma3=Workbook()
@@ -1024,37 +1021,31 @@ class test_make_worksheets(unittest.TestCase):
 		ws4_Glioma3=wb_Glioma3.create_sheet("coverage_without_duplicates")
 		ws2_Glioma3=wb_Glioma3.create_sheet("total_coverage")	
 
-		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_Glioma, coverage_rmdup,wb_Glioma3, ws9_Glioma3)[1])
-
-		self.assertEqual(ws9["B4"].value,1122)
-		self.assertEqual(ws9["C4"].value,97)
-		self.assertEqual(ws9["D4"].value,8.645276292335117)
-
-		self.assertEqual(ws9["B5"].value,0.0)
-		self.assertEqual(ws9["C5"].value,0.0)
-		self.assertEqual(ws9["B6"].value,0.0)
-		self.assertEqual(ws9["C6"].value,0.0)
-		self.assertEqual(ws9["B7"].value,None)
-		self.assertEqual(ws9["C7"].value,None)
-		self.assertEqual(ws9["B8"].value,None)
-		self.assertEqual(ws9["C8"].value,None)
-		self.assertEqual(ws9["B9"].value,None)
-		self.assertEqual(ws9["C9"].value,None)
+		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_Glioma, coverage_rmdup,wb_Glioma3, ws9_Glioma3)[0])
 
 		self.assertEqual(ws9["B15"].value,133)
 		self.assertEqual(ws9["C15"].value,4)
-		self.assertEqual(ws9["D15"].value,3.007518796992481 )
+		self.assertEqual(ws9["D15"].value,3.007518796992481)
 
-		self.assertEqual(ws9["B16"].value,0.0)
-		self.assertEqual(ws9["C16"].value,0.0)
-		self.assertEqual(ws9["B17"].value,0.0)
-		self.assertEqual(ws9["C17"].value,0.0)
-		self.assertEqual(ws9["B18"].value,None)
-		self.assertEqual(ws9["C18"].value,None)
-		self.assertEqual(ws9["B19"].value,None)
-		self.assertEqual(ws9["C19"].value,None)
-		self.assertEqual(ws9["B20"].value,None)
-		self.assertEqual(ws9["C20"].value,None)
+
+		self.assertEqual(ws9["A24"].value,"EGFR_Exon1_last10bases")
+		self.assertEqual(ws9["B24"].value,0.0)
+		self.assertEqual(ws9["C24"].value,0.0)
+		self.assertEqual(ws9["D24"].value,0.0)
+
+
+		self.assertEqual(ws9["A25"].value,"EGFR_Exon8_first10bases")
+		self.assertEqual(ws9["B25"].value,0.0)
+		self.assertEqual(ws9["C25"].value,0.0)
+		self.assertEqual(ws9["D25"].value,0.0)
+
+		self.assertEqual(ws9["A26"].value,None)
+		self.assertEqual(ws9["B26"].value,None)
+		self.assertEqual(ws9["C26"].value,None)
+		self.assertEqual(ws9["D26"].value,None)
+
+
+
 
 		#Lung
 		wb_Lung3=Workbook()
@@ -1067,37 +1058,40 @@ class test_make_worksheets(unittest.TestCase):
 		ws4_Lung3=wb_Lung3.create_sheet("coverage_without_duplicates")
 		ws2_Lung3=wb_Lung3.create_sheet("total_coverage")	
 
-		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_Lung, coverage_rmdup,wb_Lung3, ws9_Lung3)[1])
-
-		self.assertEqual(ws9["B4"].value,1122)
-		self.assertEqual(ws9["C4"].value,97)
-		self.assertEqual(ws9["D4"].value,8.645276292335117)
-
-		self.assertEqual(ws9["B5"].value,0.0)
-		self.assertEqual(ws9["C5"].value,0.0)
-		self.assertEqual(ws9["B6"].value,0.0)
-		self.assertEqual(ws9["C6"].value,0.0)
-		self.assertEqual(ws9["B7"].value,0.0)
-		self.assertEqual(ws9["C7"].value,0.0)
-		self.assertEqual(ws9["B8"].value,0.0)
-		self.assertEqual(ws9["C8"].value,0.0)
-		self.assertEqual(ws9["B9"].value,None)
-		self.assertEqual(ws9["C9"].value,None)
+		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_Lung, coverage_rmdup,wb_Lung3, ws9_Lung3)[0])
 
 		self.assertEqual(ws9["B15"].value,133)
 		self.assertEqual(ws9["C15"].value,4)
-		self.assertEqual(ws9["D15"].value,3.007518796992481 )
+		self.assertEqual(ws9["D15"].value,3.007518796992481)
 
-		self.assertEqual(ws9["B16"].value,0.0)
-		self.assertEqual(ws9["C16"].value,0.0)
-		self.assertEqual(ws9["B17"].value,0.0)
-		self.assertEqual(ws9["C17"].value,0.0)
-		self.assertEqual(ws9["B18"].value,0.0)
-		self.assertEqual(ws9["C18"].value,0.0)
-		self.assertEqual(ws9["B19"].value,0.0)
-		self.assertEqual(ws9["C19"].value,0.0)
-		self.assertEqual(ws9["B20"].value,None)
-		self.assertEqual(ws9["C20"].value,None)
+
+		self.assertEqual(ws9["A24"].value,"MET_Exon13_last10bases")
+		self.assertEqual(ws9["B24"].value,0.0)
+		self.assertEqual(ws9["C24"].value,0.0)
+		self.assertEqual(ws9["D24"].value,0.0)
+
+
+		self.assertEqual(ws9["A25"].value,"MET_Exon15_first10bases")
+		self.assertEqual(ws9["B25"].value,0.0)
+		self.assertEqual(ws9["C25"].value,0.0)
+		self.assertEqual(ws9["D25"].value,0.0)
+
+		self.assertEqual(ws9["A26"].value,"EGFR_Exon1_last10bases")
+		self.assertEqual(ws9["B26"].value,0.0)
+		self.assertEqual(ws9["C26"].value,0.0)
+		self.assertEqual(ws9["D26"].value,0.0)
+
+		self.assertEqual(ws9["A27"].value,"EGFR_Exon8_first10bases")
+		self.assertEqual(ws9["B27"].value,0.0)
+		self.assertEqual(ws9["C27"].value,0.0)
+		self.assertEqual(ws9["D27"].value,0.0)
+
+		self.assertEqual(ws9["A28"].value,None)
+		self.assertEqual(ws9["B28"].value,None)
+		self.assertEqual(ws9["C28"].value,None)
+		self.assertEqual(ws9["D28"].value,None)
+
+
 
 		#Melanoma
 		wb_Melanoma3=Workbook()
@@ -1110,21 +1104,23 @@ class test_make_worksheets(unittest.TestCase):
 		ws4_Melanoma3=wb_Melanoma3.create_sheet("coverage_without_duplicates")
 		ws2_Melanoma3=wb_Melanoma3.create_sheet("total_coverage")	
 
-		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_Melanoma, coverage_rmdup,wb_Melanoma3, ws9_Melanoma3)[1])
-
-		self.assertEqual(ws9["B4"].value,1122)
-		self.assertEqual(ws9["C4"].value,97)
-		self.assertEqual(ws9["D4"].value,8.645276292335117)
-
-		self.assertEqual(ws9["B5"].value,None)
-		self.assertEqual(ws9["C5"].value,None)
+		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_Melanoma, coverage_rmdup,wb_Melanoma3, ws9_Melanoma3)[0])
 
 		self.assertEqual(ws9["B15"].value,133)
 		self.assertEqual(ws9["C15"].value,4)
-		self.assertEqual(ws9["D15"].value,3.007518796992481 )
+		self.assertEqual(ws9["D15"].value,3.007518796992481)
 
-		self.assertEqual(ws9["B16"].value,None)
-		self.assertEqual(ws9["C16"].value,None)
+
+		self.assertEqual(ws9["A24"].value,None)
+		self.assertEqual(ws9["B24"].value,None)
+		self.assertEqual(ws9["C24"].value,None)
+		self.assertEqual(ws9["D24"].value,None)
+
+
+		self.assertEqual(ws9["A25"].value,None)
+		self.assertEqual(ws9["B25"].value,None)
+		self.assertEqual(ws9["C25"].value,None)
+		self.assertEqual(ws9["D25"].value,None)
 
 		#NTRK
 		wb_NTRK3=Workbook()
@@ -1137,18 +1133,22 @@ class test_make_worksheets(unittest.TestCase):
 		ws4_NTRK3=wb_NTRK3.create_sheet("coverage_without_duplicates")
 		ws2_NTRK3=wb_NTRK3.create_sheet("total_coverage")	
 
-		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_NTRK, coverage_rmdup,wb_NTRK3, ws9_NTRK3)[1])
-
-		self.assertEqual(ws9["B4"].value,1122)
-		self.assertEqual(ws9["C4"].value,97)
-		self.assertEqual(ws9["D4"].value,8.645276292335117)
-		self.assertEqual(ws9["B5"].value,None)
-		self.assertEqual(ws9["C5"].value,None)
+		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_NTRK, coverage_rmdup,wb_NTRK3, ws9_NTRK3)[0])
 		self.assertEqual(ws9["B15"].value,133)
 		self.assertEqual(ws9["C15"].value,4)
-		self.assertEqual(ws9["D15"].value,3.007518796992481 )
-		self.assertEqual(ws9["B16"].value,None)
-		self.assertEqual(ws9["C16"].value,None)
+		self.assertEqual(ws9["D15"].value,3.007518796992481)
+
+
+		self.assertEqual(ws9["A24"].value,None)
+		self.assertEqual(ws9["B24"].value,None)
+		self.assertEqual(ws9["C24"].value,None)
+		self.assertEqual(ws9["D24"].value,None)
+
+
+		self.assertEqual(ws9["A25"].value,None)
+		self.assertEqual(ws9["B25"].value,None)
+		self.assertEqual(ws9["C25"].value,None)
+		self.assertEqual(ws9["D25"].value,None)
 
 		#Thyroid
 
@@ -1162,37 +1162,28 @@ class test_make_worksheets(unittest.TestCase):
 		ws4_Thyroid3=wb_Thyroid3.create_sheet("coverage_without_duplicates")
 		ws2_Thyroid3=wb_Thyroid3.create_sheet("total_coverage")	
 
-		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_Thyroid, coverage_rmdup,wb_Thyroid3, ws9_Thyroid3)[1])
-
-		self.assertEqual(ws9["B4"].value,1122)
-		self.assertEqual(ws9["C4"].value,97)
-		self.assertEqual(ws9["D4"].value,8.645276292335117)
-
-		self.assertEqual(ws9["B5"].value,0.0)
-		self.assertEqual(ws9["C5"].value,0.0)
-		self.assertEqual(ws9["B6"].value,0.0)
-		self.assertEqual(ws9["C6"].value,0.0)
-		self.assertEqual(ws9["B7"].value,None)
-		self.assertEqual(ws9["C7"].value,None)
-		self.assertEqual(ws9["B8"].value,None)
-		self.assertEqual(ws9["C8"].value,None)
-		self.assertEqual(ws9["B9"].value,None)
-		self.assertEqual(ws9["C9"].value,None)
+		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_Thyroid, coverage_rmdup,wb_Thyroid3, ws9_Thyroid3)[0])
 
 		self.assertEqual(ws9["B15"].value,133)
 		self.assertEqual(ws9["C15"].value,4)
 		self.assertEqual(ws9["D15"].value,3.007518796992481)
 
-		self.assertEqual(ws9["B16"].value,0.0)
-		self.assertEqual(ws9["C16"].value,0.0)
-		self.assertEqual(ws9["B17"].value,0.0)
-		self.assertEqual(ws9["C17"].value,0.0)
-		self.assertEqual(ws9["B18"].value,None)
-		self.assertEqual(ws9["C18"].value,None)
-		self.assertEqual(ws9["B19"].value,None)
-		self.assertEqual(ws9["C19"].value,None)
-		self.assertEqual(ws9["B20"].value,None)
-		self.assertEqual(ws9["C20"].value,None)
+
+		self.assertEqual(ws9["A24"].value,"EGFR_Exon1_last10bases")
+		self.assertEqual(ws9["B24"].value,0.0)
+		self.assertEqual(ws9["C24"].value,0.0)
+		self.assertEqual(ws9["D24"].value,0.0)
+
+
+		self.assertEqual(ws9["A25"].value,"EGFR_Exon8_first10bases")
+		self.assertEqual(ws9["B25"].value,0.0)
+		self.assertEqual(ws9["C25"].value,0.0)
+		self.assertEqual(ws9["D25"].value,0.0)
+
+		self.assertEqual(ws9["A26"].value,None)
+		self.assertEqual(ws9["B26"].value,None)
+		self.assertEqual(ws9["C26"].value,None)
+		self.assertEqual(ws9["D26"].value,None)
 
 		#Tumour
 		wb_Tumour3=Workbook()
@@ -1205,37 +1196,39 @@ class test_make_worksheets(unittest.TestCase):
 		ws4_Tumour3=wb_Tumour3.create_sheet("coverage_without_duplicates")
 		ws2_Tumour3=wb_Tumour3.create_sheet("total_coverage")	
 
-		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_Tumour, coverage_rmdup,wb_Tumour3, ws9_Tumour3)[1])
-
-		self.assertEqual(ws9["B4"].value,1122)
-		self.assertEqual(ws9["C4"].value,97)
-		self.assertEqual(ws9["D4"].value,8.645276292335117)
-
-		self.assertEqual(ws9["B5"].value,0.0)
-		self.assertEqual(ws9["C5"].value,0.0)
-		self.assertEqual(ws9["B6"].value,0.0)
-		self.assertEqual(ws9["C6"].value,0.0)
-		self.assertEqual(ws9["B7"].value,0.0)
-		self.assertEqual(ws9["C7"].value,0.0)
-		self.assertEqual(ws9["B8"].value,0.0)
-		self.assertEqual(ws9["C8"].value,0.0)
-		self.assertEqual(ws9["B9"].value,None)
-		self.assertEqual(ws9["C9"].value,None)
+		ws9=(get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, "test-sample","test-NTC", referral_list_Tumour, coverage_rmdup,wb_Tumour3, ws9_Tumour3)[0])
 
 		self.assertEqual(ws9["B15"].value,133)
 		self.assertEqual(ws9["C15"].value,4)
 		self.assertEqual(ws9["D15"].value,3.007518796992481)
 
-		self.assertEqual(ws9["B16"].value,0.0)
-		self.assertEqual(ws9["C16"].value,0.0)
-		self.assertEqual(ws9["B17"].value,0.0)
-		self.assertEqual(ws9["C17"].value,0.0)
-		self.assertEqual(ws9["B18"].value,0.0)
-		self.assertEqual(ws9["C18"].value,0.0)
-		self.assertEqual(ws9["B19"].value,0.0)
-		self.assertEqual(ws9["C19"].value,0.0)
-		self.assertEqual(ws9["B20"].value,None)
-		self.assertEqual(ws9["C20"].value,None)
+		self.assertEqual(ws9["A24"].value,"MET_Exon13_last10bases")
+		self.assertEqual(ws9["B24"].value,0.0)
+		self.assertEqual(ws9["C24"].value,0.0)
+		self.assertEqual(ws9["D24"].value,0.0)
+
+		self.assertEqual(ws9["A25"].value,"MET_Exon15_first10bases")
+		self.assertEqual(ws9["B25"].value,0.0)
+		self.assertEqual(ws9["C25"].value,0.0)
+		self.assertEqual(ws9["D25"].value,0.0)
+
+		self.assertEqual(ws9["A26"].value,"EGFR_Exon1_last10bases")
+		self.assertEqual(ws9["B26"].value,0.0)
+		self.assertEqual(ws9["C26"].value,0.0)
+		self.assertEqual(ws9["D26"].value,0.0)
+
+
+		self.assertEqual(ws9["A27"].value,"EGFR_Exon8_first10bases")
+		self.assertEqual(ws9["B27"].value,0.0)
+		self.assertEqual(ws9["C27"].value,0.0)
+		self.assertEqual(ws9["D27"].value,0.0)
+
+		self.assertEqual(ws9["A28"].value,None)
+		self.assertEqual(ws9["B28"].value,None)
+		self.assertEqual(ws9["C28"].value,None)
+		self.assertEqual(ws9["D28"].value,None)
+
+
 
 
 	def test_get_met_exon_skipping(self):

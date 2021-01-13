@@ -665,84 +665,15 @@ def get_alignment_metrics_rmdup(path,sampleId, wb, ws5):
 
 def get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, sampleId, ntc, referral_list, coverage_rmdup, wb, ws9):
 
-	ws9["A2"]="with duplicates"
+
 	ws9.column_dimensions['A'].width=40
-	ws9["A3"]="Feature"
-	ws9["B3"]="AVG_DEPTH"
-	ws9["C3"]="NTC_AVG_DEPTH"
-	ws9["D3"]="%NTC contamination"
-	ws9["A4"]="Total mapped reads(including duplicates)"
 
-	#get the number of aligned reads with duplicates in the sample
-	with open (path+sampleId+"_AlignmentSummaryMetrics.txt") as file:
-		for line in file:
-			if line.startswith("CATEGORY"):
-				headers=line.split('\t')
-			if line.startswith("PAIR"):
-				pair_list=line.split('\t')
-
-
-	alignment_metrics=pandas.DataFrame([pair_list], columns=headers)
-	total_reads_aligned=alignment_metrics[['PF_HQ_ALIGNED_READS']]
-	aligned_reads_value=total_reads_aligned.iloc[0,0]
-	aligned_reads_value=int(aligned_reads_value)
-	ws9["B4"]=aligned_reads_value
-
-
-	#get the number of aligned reads with duplicates in the ntc and calculate %NTC contamination
-	with open (path+ntc+"_AlignmentSummaryMetrics.txt") as file:
-		for line in file:
-			if line.startswith("CATEGORY"):
-				headers=line.split('\t')
-			if line.startswith("PAIR"):
-				pair_list=line.split('\t')
-
-
-	alignment_metrics_ntc=pandas.DataFrame([pair_list], columns=headers)
-	total_reads_aligned_ntc=alignment_metrics_ntc[['PF_HQ_ALIGNED_READS']]
-	aligned_reads_value_ntc=total_reads_aligned_ntc.iloc[0,0]
-	aligned_reads_value_ntc=int(aligned_reads_value_ntc)
-	ws9["C4"]=aligned_reads_value_ntc
-	ws9["D4"]=((aligned_reads_value_ntc/aligned_reads_value)*100)
-
-
-	#Add the EGFR and MET hotspot coverage values with duplicates to the subpanel NTC check tab
-	if (("MET_exon14_skipping" in referral_list) or ("EGFRv3" in referral_list)):
-
-
-		if ("MET_exon14_skipping" in referral_list):
-			MET_exon_13=coverage[coverage["START"]==116411698]
-			MET_exon_15=coverage[coverage["END"]==116414944]
-			del [MET_exon_13["CHR"], MET_exon_13["START"],MET_exon_13["END"]]
-			del [MET_exon_15["CHR"],MET_exon_15["START"],MET_exon_15["END"]]
-
-			for row in dataframe_to_rows(MET_exon_13, header=False, index=False):
-				ws9.append(row)
-			for row in dataframe_to_rows(MET_exon_15, header=False, index=False):
-				ws9.append(row)
-
-
-		if ("EGFRv3" in referral_list):
-			EGFR_exon_1=coverage[coverage["START"]==55087048]
-			EGFR_exon_8=coverage[coverage["END"]==55223532]
-
-			del [EGFR_exon_1["CHR"], EGFR_exon_1["START"],EGFR_exon_1["END"]]
-			del [EGFR_exon_8["CHR"], EGFR_exon_8["START"], EGFR_exon_8["END"]]
-
-			for row in dataframe_to_rows(EGFR_exon_1, header=False, index=False):
-				ws9.append(row)
-			for row in dataframe_to_rows(EGFR_exon_8, header=False, index=False):
-				ws9.append(row)
-
-
-
-	ws9["A13"]="without duplicates" 
-	ws9["A14"]="Feature"
-	ws9["B14"]="AVG_DEPTH"
-	ws9["C14"]="NTC_AVG_DEPTH"
+	ws9["A13"]="NTC check for Arriba/STAR-Fusion referral genes" 
+	ws9["B14"]=sampleId
+	ws9["C14"]="NTC"
 	ws9["D14"]="%NTC contamination"
+	ws9["E14"]="Difference"
 	ws9["A15"]="Total mapped reads(duplicates removed)" 
-
 	ws9["B15"]= aligned_reads_value_rmdup
 
 
@@ -761,9 +692,29 @@ def get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, sampleId, 
 	aligned_reads_value_rmdup_ntc=int(aligned_reads_value_rmdup_ntc)
 	ws9["C15"]=aligned_reads_value_rmdup_ntc
 	ws9["D15"]=((aligned_reads_value_rmdup_ntc/aligned_reads_value_rmdup)*100)
+	ws9["E15"]='=B15-C15'
+
+	ws9["A16"]= "Post PCR1 Qubit"
+	ws9["B16"]='=Patient_demographics!O2'
+	ws9["D16"]='=(C16/B16)*100'
+	ws9["E16"]='=B16-C16'
+
+
+	ws9["A21"]="NTC check for RMATS events(METex14skp and EGFRv3)" 
+	ws9["A22"]="without duplicates" 
+	ws9["A23"]="Feature"
+	ws9["B23"]="AVG_DEPTH"
+	ws9["C23"]="NTC_AVG_DEPTH"
+	ws9["D23"]="%NTC contamination"
+
+	font_bold=Font(bold=True)
+	position= ['A13','A21']
+	for cell in position:
+		ws9[cell].font=font_bold
 
 
 	#Add the EGFR and MET hotspot coverage values without duplicates removed to the subpanel NTC check tab
+
 	if (("MET_exon14_skipping" in referral_list) or ("EGFRv3" in referral_list)):
 
 
@@ -828,7 +779,7 @@ def get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, sampleId, 
 	ws9.conditional_formatting.add('D15:D21', CellIsRule( operator='greaterThan', formula=['10'], stopIfTrue=True, fill=colour))
 
 
-	return(aligned_reads_value, ws9, wb)
+	return(ws9, wb)
 
 
 def get_met_exon_skipping(referral_list, sampleId, referral, worksheetId, seqId, path,ntc, coverage_rmdup, wb, ws5, ws6):
@@ -1177,8 +1128,11 @@ if __name__ == "__main__":
 
 
 	path="/data/results/"+seqId + "/RocheSTFusion/"
+	path ="/home/lm/RocheSTFusion/"
 
 	referrals_path="/data/diagnostics/pipelines/SomaticFusion/SomaticFusion-"+version+"/"
+
+	referrals_path="/home/lm/test_worksheets/SomaticFusion/"
 
 
 
@@ -1235,8 +1189,8 @@ if __name__ == "__main__":
 	coverage_rmdup, coverage, ws3, ws4, wb=get_coverage(referral, ntc_average_depth, ntc_average_depth_rmdup, sampleId,path, wb, ws3, ws4)
 	wb, ws1, ws2, ws3,ws4,ws5,ws6,ws7, ws9=format_analysis_sheet(referral, wb, ws1, ws2, ws3,ws4, ws5, ws6, ws7,ws9)
 	aligned_reads_value_rmdup, percentage_aligned_reads_rmdup,wb, ws5=get_alignment_metrics_rmdup(path,sampleId,wb,ws5)
-	aligned_reads_value, ws9,wb=get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, sampleId,ntc, referral_list,coverage_rmdup,wb,ws9)
+	ws9,wb=get_subpanel_NTC_check(coverage, aligned_reads_value_rmdup, path, sampleId,ntc, referral_list,coverage_rmdup,wb,ws9)
 
 	if (("MET_exon14_skipping" in referral_list) or ("EGFRv3" in referral_list)):
 		ws5, ws8, wb,ws6=get_met_exon_skipping(referral_list, sampleId, referral, worksheetId, seqId, path, ntc, coverage_rmdup,wb, ws5, ws6)
-	wb.save("../"+sampleId+"_"+referral +".xlsx")
+	wb.save(path +sampleId+"_"+referral +".xlsx")
