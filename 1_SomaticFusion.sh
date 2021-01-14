@@ -32,8 +32,6 @@ gatk3=/share/apps/GATK-distros/GATK_3.8.0/GenomeAnalysisTK.jar
 minMQS=20
 minBQS=10
 
-vendorCaptureBed=./180702_HG19_PanCancer_EZ_capture_targets.bed
-vendorPrimaryBed=./180702_HG19_PanCancer_EZ_primary_targets.bed
 
 . $panel.variables
 . SomaticFusion.config
@@ -112,7 +110,22 @@ STAR-Fusion --genome_lib_dir $starfusion_lib \
 
 cd STAR-Fusion
 
-/home/transfer/miniconda3/envs/SomaticFusion/lib/STAR-Fusion/FusionInspector/FusionInspector --fusions star-fusion.fusion_predictions.abridged.coding_effect.tsv  --out_prefix finspector  --min_junction_reads 1  --min_novel_junction_support 3  --min_spanning_frags_only 5  --vis  --max_promiscuity 10  --out_dir /share/data/results/"$seqId"/RocheSTFusion/"$sampleId"/STAR-Fusion/FusionInspector-validate  --genome_lib_dir /share/apps/star-fusion/GRCh37_gencode_v19_CTAT_lib_Mar272019.plug-n-play/ctat_genome_lib_build_dir/  --CPU 12  --samples_file /share/data/results/"$seqId"/RocheSTFusion/"$sampleId"/STAR-Fusion/starF.target_samples.txt  --include_Trinity  --annotate  --examine_coding_effect --require_LDAS 0
+/home/transfer/miniconda3/envs/SomaticFusion/lib/STAR-Fusion/FusionInspector/FusionInspector \
+--fusions star-fusion.fusion_predictions.abridged.coding_effect.tsv \
+--out_prefix finspector  \
+--min_junction_reads 1  \
+--min_novel_junction_support 3 \  
+--min_spanning_frags_only 5  \
+--vis  \
+--max_promiscuity 10 \ 
+--out_dir /share/data/results/"$seqId"/RocheSTFusion/"$sampleId"/STAR-Fusion/FusionInspector-validate \ 
+--genome_lib_dir /share/apps/star-fusion/GRCh37_gencode_v19_CTAT_lib_Mar272019.plug-n-play/ctat_genome_lib_build_dir/  \
+--CPU 12  \
+--samples_file /share/data/results/"$seqId"/RocheSTFusion/"$sampleId"/STAR-Fusion/starF.target_samples.txt \ 
+--include_Trinity  \
+--annotate  \
+--examine_coding_effect \ 
+--require_LDAS 0
 
 cd ..
 
@@ -477,7 +490,7 @@ scp /data/archive/fastq/"$seqId"/SampleSheet.csv .
 
 
 #Get the samples column from the samplesheet and add to a new file
-grep -A 100 "^Sample_ID" SampleSheet.csv >> samples.csv
+grep -A 1000000 "^Sample_ID" SampleSheet.csv >> samples.csv
 
 awk -F',' '{print $1}' samples.csv >>samples_correct_order.txt
 
