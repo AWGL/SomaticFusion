@@ -202,7 +202,7 @@ class test_make_worksheets(unittest.TestCase):
 		NTC_star_fusion_report_Lung, NTC_arriba_report_Lung,wb_Lung_output,ws6_Lung_output=(get_NTC_fusion_report("test-NTC",referral_list_Lung, path, wb_Lung, ws6_Lung))
 		self.assertEqual(ws6_Lung["A5"].value,"ALK-no fusions found")
 		self.assertEqual(ws6_Lung["A6"].value,"RET-no fusions found")
-		self.assertEqual(ws6_Lung["A7"].value,"ROS1-no fusions found")
+		self.assertEqual(ws6_Lung["A7"].value,"ROS1--Gene1")
 		self.assertEqual(ws6_Lung["A8"].value,"NTRK1-no fusions found")
 		self.assertEqual(ws6_Lung["A9"].value,"NTRK2-no fusions found")
 		self.assertEqual(ws6_Lung["A10"].value,"NTRK3-no fusions found")
@@ -287,7 +287,7 @@ class test_make_worksheets(unittest.TestCase):
 		self.assertEqual(ws6_Tumour["A8"].value,"NTRK2-no fusions found")
 		self.assertEqual(ws6_Tumour["A9"].value,"NTRK3-no fusions found")
 		self.assertEqual(ws6_Tumour["A10"].value,"RET-no fusions found")
-		self.assertEqual(ws6_Tumour["A11"].value,"ROS1-no fusions found")
+		self.assertEqual(ws6_Tumour["A11"].value,"ROS1--Gene1")
 		self.assertEqual(ws6_Tumour["A12"].value, None)
 
 		self.assertEqual(ws6_Tumour["A20"].value,"ALK-no fusions found")

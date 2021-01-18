@@ -40,7 +40,9 @@ def get_NTC_fusion_report(ntc, referral_list, path,wb, ws6):
 					dict_NTC_star_fusion=({"Fusion_name": referral + "-no fusions found", "Split_Read_Count": "", "Spanning_Read_Count": "", "Left_Breakpoint": "", "Right_Breakpoint": "", "SpliceType": "", "LargeAnchorSupport": "", "FFPM": "", "LeftBreakEntropy": "", "RightBreakEntropy": "", "CDS_Left_ID": "", "CDS_Left_Range": "", "CDS_Right_ID": "", "CDS_Right_Range": "", "Prot_Fusion_Type": "", "Num_WT_Fragments_Left": "", "Num_WT_Fragments_Right": "", "Fusion_Allelic_Fraction": ""}) 
 					NTC_star_fusion_report= pandas.DataFrame(dict_NTC_star_fusion, columns=["Fusion_name", "Split_Read_Count", "Spanning_Read_Count", "Left_Breakpoint", "Right_Breakpoint", "SpliceType", "LargeAnchorSupport", "FFPM", "type", "LeftBreakEntropy", "RightBreakEntropy", "CDS_Left_ID", "CDS_Left_Range", "CDS_Right_ID", "CDS_Right_Range", "Prot_Fusion_Type", "Num_WT_Fragments_Left", "Num_WT_Fragments_Right", "Fusion_Allelic_Fraction"], index=[0]) 	
 
-	
+				else:
+					del NTC_star_fusion_report['Unnamed: 0']
+
 				for row in dataframe_to_rows(NTC_star_fusion_report, header=False, index=False):
 					ws6.append(row)
 
