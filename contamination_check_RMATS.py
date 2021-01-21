@@ -29,7 +29,7 @@ sample_number=0
 
 
 for sample in sampleList:
-    NTC_in_sample= ("NTC" in sample)
+    NTC_in_sample= ("NTC" in sample.upper())
 
     if (NTC_in_sample==False):
         #get referral from variables file for sample
@@ -39,7 +39,7 @@ for sample in sampleList:
 
        #get list of genes in the referral for the sample
         referral_equals, referral= referral_string.split("=")
-        referral_file=pandas.read_csv("/data/diagnostics/pipelines/SomaticFusion/SomaticFusion-"+version+"/Referrals/"+referral+".txt", sep="\t")
+        referral_file=pandas.read_csv("/data/diagnostics/pipelines/SomaticFusion/SomaticFusion-"+version+"/RocheSTFusion/Referrals/"+referral+".txt", sep="\t")
         gene_list=list(referral_file['Genes'])
 
         len_gene_list=len(gene_list)

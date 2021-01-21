@@ -128,8 +128,6 @@ def fusion_report(args):
             faf = ((fafL + fafR) / 2)
 
 
-            right_breakpoint = sfln[8]
-
             FFPM="none"
 
             with open("./STAR-Fusion/star-fusion.fusion_predictions.abridged.tsv") as fusion_FFPM:
