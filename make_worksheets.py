@@ -1129,12 +1129,12 @@ if __name__ == "__main__":
 
 
 
+
 	path="/data/results/"+seqId + "/RocheSTFusion/"
-	path ="/home/lm/RocheSTFusion/"
 
-	referrals_path="/data/diagnostics/pipelines/SomaticFusion/SomaticFusion-"+version+"/"
+	referrals_path="/data/diagnostics/pipelines/SomaticFusion/SomaticFusion-"+version+"/RocheSTFusion/"
 
-	referrals_path="/home/lm/test_worksheets/SomaticFusion/"
+
 
 
 
