@@ -35,3 +35,8 @@ Each sample directory must contain:
 - A variables file in the format {sampleId}.variables
 - Zipped fastq files
 
+
+## Running tests
+The VirtualHood environment must be activated
+
+
