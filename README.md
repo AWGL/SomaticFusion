@@ -1,5 +1,12 @@
 # SomaticFusion
 
+
+## IMPORTANT: Updating version on the cluster:
+When updating the pipeline version on the cluster, the rmats folder should be copied from the previous version into the new version of the pipeline. This is not on github due to it containing sensitive information but is required for the pipeline to run without errors.
+
+Also check the version number at the top of the 1_SomaticFusion.sh script is updated, otherwise it will run through the wrong version.
+
+
 ## Description:
 
 Somatic pipeline used to call intergenic fusions using STAR-Fusion and arriba, and exon skipping events using RMATS.
@@ -27,3 +34,6 @@ Each worksheet will have its own NTC which needs to be in the format NTC-{worksh
 Each sample directory must contain:
 - A variables file in the format {sampleId}.variables
 - Zipped fastq files
+
+## Running tests
+The VirtualHood environment must be activated
